@@ -1,0 +1,89 @@
+@model DotnetProject.Web.Models.DeploymentRecord
+
+@{
+    ViewData["Title"] = "Log Deployment";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card p-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="fw-bold text-light mb-0">
+                    <i class="bi bi-plus-circle text-primary me-2"></i>Log New Deployment
+                </h3>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+            <hr class="border-secondary mb-4" />
+
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="AppName" class="form-label text-secondary"></label>
+                        <input asp-for="AppName" class="form-control bg-dark text-light border-secondary" placeholder="e.g. DotnetProject.Web" />
+                        <span asp-validation-for="AppName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Version" class="form-label text-secondary"></label>
+                        <input asp-for="Version" class="form-control bg-dark text-light border-secondary" placeholder="e.g. v1.0.1" />
+                        <span asp-validation-for="Version" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Environment" class="form-label text-secondary"></label>
+                        <select asp-for="Environment" class="form-select bg-dark text-light border-secondary">
+                            <option value="Production">Production</option>
+                            <option value="Staging">Staging</option>
+                            <option value="Development">Development</option>
+                        </select>
+                        <span asp-validation-for="Environment" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label text-secondary"></label>
+                        <select asp-for="Status" class="form-select bg-dark text-light border-secondary">
+                            <option value="Successful">Successful</option>
+                            <option value="Failed">Failed</option>
+                            <option value="In-Progress">In-Progress</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="DeployedBy" class="form-label text-secondary"></label>
+                        <input asp-for="DeployedBy" class="form-control bg-dark text-light border-secondary" />
+                        <span asp-validation-for="DeployedBy" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CommitHash" class="form-label text-secondary"></label>
+                        <input asp-for="CommitHash" class="form-control bg-dark text-light border-secondary" placeholder="Git SHA" />
+                        <span asp-validation-for="CommitHash" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Notes" class="form-label text-secondary"></label>
+                    <textarea asp-for="Notes" class="form-control bg-dark text-light border-secondary" rows="3" placeholder="Changelog, bug fixes, or deployment observations..."></textarea>
+                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-cloud-check me-1"></i> Save Deployment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

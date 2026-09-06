@@ -1,0 +1,90 @@
+@model DotnetProject.Web.Models.DeploymentRecord
+
+@{
+    ViewData["Title"] = "Deployment Details";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card p-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="fw-bold text-light mb-0">
+                    <i class="bi bi-info-circle text-info me-2"></i>Deployment Details
+                </h3>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+            <hr class="border-secondary mb-4" />
+
+            <div class="row g-3">
+                <div class="col-sm-4 text-secondary">Record ID:</div>
+                <div class="col-sm-8 text-light fw-medium">#@Model.Id</div>
+
+                <div class="col-sm-4 text-secondary">Application Name:</div>
+                <div class="col-sm-8 text-light fw-bold text-primary">@Model.AppName</div>
+
+                <div class="col-sm-4 text-secondary">Version:</div>
+                <div class="col-sm-8"><code>@Model.Version</code></div>
+
+                <div class="col-sm-4 text-secondary">Target Environment:</div>
+                <div class="col-sm-8">
+                    @if (Model.Environment == "Production")
+                    {
+                        <span class="badge badge-env-prod">Production</span>
+                    }
+                    else if (Model.Environment == "Staging")
+                    {
+                        <span class="badge badge-env-staging">Staging</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-env-dev">@Model.Environment</span>
+                    }
+                </div>
+
+                <div class="col-sm-4 text-secondary">Status:</div>
+                <div class="col-sm-8">
+                    @if (Model.Status == "Successful")
+                    {
+                        <span class="badge badge-status-success"><i class="bi bi-check-circle me-1"></i>Successful</span>
+                    }
+                    else if (Model.Status == "Failed")
+                    {
+                        <span class="badge badge-status-failed"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-status-pending">@Model.Status</span>
+                    }
+                </div>
+
+                <div class="col-sm-4 text-secondary">Deployed By:</div>
+                <div class="col-sm-8 text-light">@Model.DeployedBy</div>
+
+                <div class="col-sm-4 text-secondary">Git Commit SHA:</div>
+                <div class="col-sm-8 font-monospace text-warning">@Model.CommitHash</div>
+
+                <div class="col-sm-4 text-secondary">Deployed At (UTC):</div>
+                <div class="col-sm-8 text-light">@Model.DeployedAt.ToString("F")</div>
+
+                <div class="col-sm-4 text-secondary">Release Notes:</div>
+                <div class="col-sm-8">
+                    <div class="p-3 bg-dark rounded border border-secondary text-secondary">
+                        @(string.IsNullOrEmpty(Model.Notes) ? "No notes recorded for this release." : Model.Notes)
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-secondary my-4" />
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                    <i class="bi bi-pencil me-1"></i> Edit Record
+                </a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

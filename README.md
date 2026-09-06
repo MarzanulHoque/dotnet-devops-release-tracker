@@ -200,7 +200,6 @@ In your GitHub repository, go to **Settings** $\rightarrow$ **Secrets and variab
 | `EC2_HOST` | EC2 Public IPv4 or DNS | `54.210.88.12` |
 | `EC2_USERNAME` | SSH username | `ubuntu` |
 | `EC2_SSH_KEY` | Entire content of your `.pem` private key | `-----BEGIN RSA PRIVATE KEY----- ...` |
-| `EC2_PORT` *(Optional)* | SSH port (defaults to 22) | `22` |
 
 ### Step 4: Push to Main & Deploy
 ```bash

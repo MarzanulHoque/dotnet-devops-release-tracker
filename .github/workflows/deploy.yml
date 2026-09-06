@@ -70,7 +70,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.EC2_PORT || 22 }}
           source: "./release/*"
           target: "/tmp/dotnetapp-update"
           strip_components: 1
@@ -81,7 +80,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.EC2_PORT || 22 }}
           script: |
             set -e
             echo "--- Stopping existing application service ---"

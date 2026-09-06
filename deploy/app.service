@@ -1,0 +1,25 @@
+[Unit]
+Description=ASP.NET Core Web Application (DevOps Release Tracker)
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/dotnetapp
+ExecStart=/usr/bin/dotnet /var/www/dotnetapp/DotnetProject.Web.dll
+Restart=always
+# Restart service after 10 seconds if dotnet service crashes
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=dotnetapp
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5000
+# Load database connection and secrets from secure server-only environment file
+EnvironmentFile=-/etc/dotnetapp.env
+
+# Security sandboxing
+ProtectSystem=full
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

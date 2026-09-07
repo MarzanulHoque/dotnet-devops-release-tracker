@@ -138,7 +138,51 @@ jobs:
               sudo chown www-data:www-data /etc/dotnetapp.env
             fi
 
-            # 4. Stop existing service and sync new binaries
+            # 4. Ensure Nginx is installed and configured as reverse proxy
+            if ! command -v nginx &> /dev/null; then
+              echo "--- Installing Nginx ---"
+              sudo apt-get update -y
+              sudo apt-get install -y nginx
+            fi
+
+            if [ ! -f /etc/nginx/sites-available/dotnetapp ]; then
+              echo "--- Configuring Nginx reverse proxy for port 80 -> 5000 ---"
+              sudo bash -c 'cat <<EOF > /etc/nginx/sites-available/dotnetapp
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    location / {
+        proxy_pass         http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade \$http_upgrade;
+        proxy_set_header   Connection keep-alive;
+        proxy_set_header   Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header   X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto \$scheme;
+        proxy_set_header   X-Real-IP \$remote_addr;
+    }
+
+    location /health {
+        proxy_pass         http://127.0.0.1:5000/health;
+        proxy_http_version 1.1;
+        proxy_set_header   Host \$host;
+    }
+}
+EOF'
+              sudo ln -sf /etc/nginx/sites-available/dotnetapp /etc/nginx/sites-enabled/dotnetapp
+              sudo rm -f /etc/nginx/sites-enabled/default
+              sudo nginx -t
+              sudo systemctl restart nginx
+              sudo systemctl enable nginx
+              echo "Nginx reverse proxy active on port 80."
+            else
+              sudo systemctl restart nginx || true
+            fi
+
+            # 5. Stop existing service and sync new binaries
             echo "--- Stopping existing application service (if active) ---"
             sudo systemctl stop dotnetapp.service || true
 
@@ -147,20 +191,20 @@ jobs:
             sudo cp -r /tmp/dotnetapp-update/* /var/www/dotnetapp/
             sudo rm -rf /tmp/dotnetapp-update
 
-            # 5. Set secure file ownership and permissions
+            # 6. Set secure file ownership and permissions
             echo "--- Setting permissions ---"
             sudo chown -R www-data:www-data /var/www/dotnetapp
             sudo chmod -R 755 /var/www/dotnetapp
 
-            # 6. Restart systemd daemon and verify active state
+            # 7. Restart systemd daemon and verify active state
             echo "--- Restarting dotnetapp.service ---"
             sudo systemctl daemon-reload
             sudo systemctl restart dotnetapp.service
             sleep 3
             sudo systemctl is-active --quiet dotnetapp.service && echo "Service is ACTIVE and running!"
 
-            # 7. Smoke test
-            echo "--- Running Smoke Test against /health endpoint ---"
-            curl -s -f http://127.0.0.1:5000/health || curl -s -f http://localhost/health
+            # 8. Smoke test
+            echo "--- Running Smoke Test against /health endpoint (via Nginx port 80 and Kestrel port 5000) ---"
+            curl -s -f http://127.0.0.1/health || curl -s -f http://127.0.0.1:5000/health
             echo ""
-            echo "=== Smoke test PASSED! Deployment successfully completed. ==="
+            echo "=== Smoke test PASSED! Application is publicly live on port 80! ==="

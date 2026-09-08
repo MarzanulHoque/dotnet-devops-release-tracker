@@ -82,129 +82,24 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-            echo "=== Starting Automated EC2 Deployment ==="
-
-            # 1. Ensure .NET 8 Runtime is installed on EC2
-            if ! command -v dotnet &> /dev/null; then
-              echo "--- .NET not found: Installing .NET 8 ASP.NET Core Runtime ---"
-              REPO_VERSION=$(lsb_release -rs)
-              wget -q "https://packages.microsoft.com/config/ubuntu/${REPO_VERSION}/packages-microsoft-prod.deb" -O /tmp/packages-microsoft-prod.deb
-              sudo dpkg -i /tmp/packages-microsoft-prod.deb
-              rm -f /tmp/packages-microsoft-prod.deb
-              sudo apt-get update -y
-              sudo apt-get install -y aspnetcore-runtime-8.0
-              echo ".NET 8 Runtime installed successfully."
-            fi
-
-            # 2. Ensure systemd service file exists on EC2
-            if [ ! -f /etc/systemd/system/dotnetapp.service ]; then
-              echo "--- Provisioning /etc/systemd/system/dotnetapp.service ---"
-              sudo bash -c 'cat <<EOF > /etc/systemd/system/dotnetapp.service
-            [Unit]
-            Description=ASP.NET Core Web Application (DevOps Release Tracker)
-            After=network.target
-
-            [Service]
-            WorkingDirectory=/var/www/dotnetapp
-            ExecStart=/usr/bin/dotnet /var/www/dotnetapp/DotnetProject.Web.dll
-            Restart=always
-            RestartSec=10
-            KillSignal=SIGINT
-            SyslogIdentifier=dotnetapp
-            User=www-data
-            Environment=ASPNETCORE_ENVIRONMENT=Production
-            Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
-            Environment=ASPNETCORE_URLS=http://127.0.0.1:5000
-            EnvironmentFile=-/etc/dotnetapp.env
-            ProtectSystem=full
-            NoNewPrivileges=true
-
-            [Install]
-            WantedBy=multi-user.target
-            EOF'
-              sudo systemctl daemon-reload
-              sudo systemctl enable dotnetapp.service
-              echo "dotnetapp.service installed and enabled."
-            fi
-
-            # 3. Ensure baseline /etc/dotnetapp.env exists
-            if [ ! -f /etc/dotnetapp.env ]; then
-              echo "--- Creating baseline /etc/dotnetapp.env ---"
-              sudo bash -c 'cat <<EOF > /etc/dotnetapp.env
-            # Server environment variables - Never committed to source control
-            ASPNETCORE_ENVIRONMENT=Production
-            EOF'
-              sudo chmod 600 /etc/dotnetapp.env
-              sudo chown www-data:www-data /etc/dotnetapp.env
-            fi
-
-            # 4. Ensure Nginx is installed and configured as reverse proxy
-            if ! command -v nginx &> /dev/null; then
-              echo "--- Installing Nginx ---"
-              sudo apt-get update -y
-              sudo apt-get install -y nginx
-            fi
-
-            if [ ! -f /etc/nginx/sites-available/dotnetapp ]; then
-              echo "--- Configuring Nginx reverse proxy for port 80 -> 5000 ---"
-              sudo bash -c 'cat <<EOF > /etc/nginx/sites-available/dotnetapp
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    server_name _;
-
-    location / {
-        proxy_pass         http://127.0.0.1:5000;
-        proxy_http_version 1.1;
-        proxy_set_header   Upgrade \$http_upgrade;
-        proxy_set_header   Connection keep-alive;
-        proxy_set_header   Host \$host;
-        proxy_cache_bypass \$http_upgrade;
-        proxy_set_header   X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto \$scheme;
-        proxy_set_header   X-Real-IP \$remote_addr;
-    }
-
-    location /health {
-        proxy_pass         http://127.0.0.1:5000/health;
-        proxy_http_version 1.1;
-        proxy_set_header   Host \$host;
-    }
-}
-EOF'
-              sudo ln -sf /etc/nginx/sites-available/dotnetapp /etc/nginx/sites-enabled/dotnetapp
-              sudo rm -f /etc/nginx/sites-enabled/default
-              sudo nginx -t
-              sudo systemctl restart nginx
-              sudo systemctl enable nginx
-              echo "Nginx reverse proxy active on port 80."
-            else
-              sudo systemctl restart nginx || true
-            fi
-
-            # 5. Stop existing service and sync new binaries
-            echo "--- Stopping existing application service (if active) ---"
+            echo "--- Stopping existing application service ---"
             sudo systemctl stop dotnetapp.service || true
 
-            echo "--- Syncing release binaries to /var/www/dotnetapp ---"
+            echo "--- Syncing binaries to /var/www/dotnetapp ---"
             sudo mkdir -p /var/www/dotnetapp
             sudo cp -r /tmp/dotnetapp-update/* /var/www/dotnetapp/
             sudo rm -rf /tmp/dotnetapp-update
 
-            # 6. Set secure file ownership and permissions
             echo "--- Setting permissions ---"
             sudo chown -R www-data:www-data /var/www/dotnetapp
             sudo chmod -R 755 /var/www/dotnetapp
 
-            # 7. Restart systemd daemon and verify active state
-            echo "--- Restarting dotnetapp.service ---"
+            echo "--- Starting and enabling dotnetapp.service ---"
             sudo systemctl daemon-reload
             sudo systemctl restart dotnetapp.service
-            sleep 3
-            sudo systemctl is-active --quiet dotnetapp.service && echo "Service is ACTIVE and running!"
+            sudo systemctl is-active --quiet dotnetapp.service && echo "Service is ACTIVE"
 
-            # 8. Smoke test
-            echo "--- Running Smoke Test against /health endpoint (via Nginx port 80 and Kestrel port 5000) ---"
-            curl -s -f http://127.0.0.1/health || curl -s -f http://127.0.0.1:5000/health
-            echo ""
-            echo "=== Smoke test PASSED! Application is publicly live on port 80! ==="
+            echo "--- Running Smoke Test against /health endpoint ---"
+            sleep 3
+            curl -s -f http://127.0.0.1:5000/health || curl -s -f http://localhost/health
+            echo "Smoke test PASSED! Deployment complete."

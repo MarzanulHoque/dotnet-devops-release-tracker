@@ -1,11 +1,17 @@
 # 🚀 DevOps Deployment Tracker — ASP.NET Core 8.0 on AWS EC2
 
 [![CI/CD Build & Test](https://github.com/marzanulhoque/dotnet-devops-release-tracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/marzanulhoque/dotnet-devops-release-tracker/actions)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-13.220.86.134-success?logo=amazonaws)](http://13.220.86.134/)
+[![Health Status](https://img.shields.io/badge/Health%20Check-Healthy%20200%20OK-brightgreen?logo=statuspage)](http://13.220.86.134/health)
 ![.NET 8.0](https://img.shields.io/badge/.NET-8.0%20LTS-512BD4?logo=dotnet)
 ![AWS EC2](https://img.shields.io/badge/AWS-EC2%20Linux-FF9900?logo=amazonec2)
 ![MySQL](https://img.shields.io/badge/Database-MySQL%208.0-4479A1?logo=mysql)
 ![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions)
 ![systemd](https://img.shields.io/badge/Daemon-systemd-black?logo=linux)
+
+> 🌐 **Live Public Deployment:** [http://13.220.86.134/](http://13.220.86.134/)  
+> 🩺 **Live Health & Observability:** [http://13.220.86.134/health](http://13.220.86.134/health)  
+> ⚙️ **Host Architecture:** AWS EC2 Linux (Ubuntu 24.04 LTS) • Nginx Reverse Proxy (:80) • systemd Daemon (`dotnetapp.service`) • Kestrel (:5000)
 
 A production-grade **ASP.NET Core 8.0 MVC** application automated with **GitHub Actions CI/CD** targeting an **AWS Linux EC2** instance running native Kestrel managed by **`systemd`** and reverse-proxied with **Nginx** (no container overhead). 
 
@@ -41,6 +47,7 @@ This project serves as **Phase 1** of an architectural evolution journey from a 
 
 ## ✨ Key Features
 
+- **Live Cloud Deployment:** Deployed and actively serving traffic on AWS EC2 at [http://13.220.86.134/](http://13.220.86.134/) with real-time health metrics at [`/health`](http://13.220.86.134/health).
 - **DevOps Release Dashboard:** Track, log, and filter deployment records across environments (`Development`, `Staging`, `Production`) with commit hashes, deployer info, and release notes.
 - **Automated Fail-Safe CI Gates:** Every push runs automated xUnit tests. If model validation, controller logic, or health checks fail, the deployment is aborted immediately.
 - **Zero-Container EC2 Deployment:** Direct execution via Kestrel on AWS EC2 Free Tier (`t2.micro` / `t3.micro`), delivering maximum throughput and minimal cloud cost.
@@ -208,6 +215,8 @@ git commit -m "feat: trigger deployment"
 git push origin main
 ```
 GitHub Actions will build, run test gates, transfer binaries via SCP to `/var/www/dotnetapp`, restart `dotnetapp.service`, and verify `/health`.
+
+Once deployed, visit your live instance at `http://<YOUR_EC2_PUBLIC_IP>/` (or explore the live demo running at [http://13.220.86.134/](http://13.220.86.134/)).
 
 ---
 

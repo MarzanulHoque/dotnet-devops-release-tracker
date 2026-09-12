@@ -63,19 +63,19 @@ EOF"
     echo "/etc/dotnetapp.env created with restricted 600 permissions."
 fi
 
-# 5. Create App Directory and set permissions
-echo "Setting up application directory /var/www/dotnetapp..."
-sudo mkdir -p /var/www/dotnetapp
-sudo chown -R www-data:www-data /var/www/dotnetapp
-sudo chmod -R 755 /var/www/dotnetapp
+# 5. Create App Directories and set permissions
+echo "Setting up application directories /var/www/dotnetapp and /var/www/dotnetapi..."
+sudo mkdir -p /var/www/dotnetapp /var/www/dotnetapi
+sudo chown -R www-data:www-data /var/www/dotnetapp /var/www/dotnetapi
+sudo chmod -R 755 /var/www/dotnetapp /var/www/dotnetapi
 
-# Allow deployment user (e.g., ubuntu) to write to /var/www/dotnetapp
+# Allow deployment user (e.g., ubuntu) to write to app directories
 CURRENT_USER=$(whoami)
 sudo usermod -a -G www-data "$CURRENT_USER"
-sudo chmod -R g+w /var/www/dotnetapp
+sudo chmod -R g+w /var/www/dotnetapp /var/www/dotnetapi
 
-# 5. Configure systemd service
-echo "Configuring systemd service..."
+# 6. Configure systemd services (Web & API)
+echo "Configuring systemd services..."
 if [ -f "./app.service" ]; then
     sudo cp ./app.service /etc/systemd/system/dotnetapp.service
     sudo systemctl daemon-reload
@@ -83,7 +83,14 @@ if [ -f "./app.service" ]; then
     echo "dotnetapp.service installed and enabled."
 fi
 
-# 6. Configure Nginx Reverse Proxy
+if [ -f "./api.service" ]; then
+    sudo cp ./api.service /etc/systemd/system/dotnetapi.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable dotnetapi.service
+    echo "dotnetapi.service installed and enabled."
+fi
+
+# 7. Configure Nginx Reverse Proxy
 echo "Configuring Nginx reverse proxy..."
 if [ -f "./nginx.conf" ]; then
     sudo cp ./nginx.conf /etc/nginx/sites-available/dotnetapp
@@ -94,7 +101,7 @@ if [ -f "./nginx.conf" ]; then
     echo "Nginx configured and restarted."
 fi
 
-# 7. Configure Firewall (UFW)
+# 8. Configure Firewall (UFW)
 echo "Configuring firewall..."
 sudo ufw allow 'OpenSSH'
 sudo ufw allow 'Nginx Full'
@@ -102,8 +109,9 @@ sudo ufw allow 'Nginx Full'
 
 echo "=========================================================="
 echo "EC2 Setup Completed Successfully!"
-echo "App Directory: /var/www/dotnetapp"
-echo "Service Name : dotnetapp.service"
-echo "Status check : sudo systemctl status dotnetapp.service"
-echo "Log check    : sudo journalctl -u dotnetapp.service -f"
+echo "Web App Directory : /var/www/dotnetapp (:5000)"
+echo "REST API Directory: /var/www/dotnetapi (:5050)"
+echo "Services          : dotnetapp.service, dotnetapi.service"
+echo "Status checks     : sudo systemctl status dotnetapp dotnetapi"
+echo "Log checks        : sudo journalctl -u dotnetapp -u dotnetapi -f"
 echo "=========================================================="

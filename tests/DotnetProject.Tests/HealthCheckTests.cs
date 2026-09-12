@@ -1,30 +1,18 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using DotnetProject.Web.Controllers;
-using DotnetProject.Core.Data;
 using Xunit;
 
 namespace DotnetProject.Tests
 {
     public class HealthCheckTests
     {
-        private ApplicationDbContext CreateInMemoryDbContext(string dbName)
-        {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: dbName)
-                .Options;
-
-            return new ApplicationDbContext(options);
-        }
-
         [Fact]
-        public async Task HealthEndpoint_ReturnsOkOrStatus200_WithDiagnostics()
+        public async Task HealthEndpoint_ReturnsOkOrStatus200_WithApiTierDiagnostics()
         {
             // Arrange
-            using var context = CreateInMemoryDbContext("HealthCheckDb");
-            var controller = new HealthController(context);
+            var fakeApiClient = new FakeDeploymentApiClient();
+            var controller = new HealthController(fakeApiClient);
 
             // Act
             var result = await controller.Get();

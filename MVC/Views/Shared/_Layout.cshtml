@@ -4,69 +4,49 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - DevOps Cloud Release Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/DotnetProject.Web.styles.css" asp-append-version="true" />
-    <style>
-        :root {
-            --bs-body-bg: #0f172a;
-            --bs-body-color: #cbd5e1;
-            --bs-card-bg: #1e293b;
-        }
-        .navbar-custom {
-            background-color: #1e293b !important;
-            border-bottom: 1px solid #334155;
-        }
-        .card {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 0.75rem;
-        }
-        .table {
-            color: #cbd5e1;
-        }
-        .badge-env-prod { background-color: #ef4444; color: white; }
-        .badge-env-staging { background-color: #f59e0b; color: white; }
-        .badge-env-dev { background-color: #3b82f6; color: white; }
-        .badge-status-success { background-color: #10b981; color: white; }
-        .badge-status-failed { background-color: #ef4444; color: white; }
-        .badge-status-pending { background-color: #64748b; color: white; }
-        .stat-icon {
-            font-size: 2rem;
-            opacity: 0.8;
-        }
-    </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4 shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-cloud-arrow-up-fill fs-4"></i>
-                    <span>DevOps Tracker</span>
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                    <span class="d-inline-flex align-items-center justify-content-center p-2 rounded-3" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);">
+                        <i class="bi bi-cloud-arrow-up-fill text-white fs-5"></i>
+                    </span>
+                    <span class="bg-gradient text-white">DevOps Tracker</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-speedometer2 me-1 text-primary"></i> Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Deployments" asp-action="Index"><i class="bi bi-journal-code me-1"></i> Releases</a>
+                            <a class="nav-link" asp-controller="Deployments" asp-action="Index"><i class="bi bi-stack me-1 text-info"></i> Releases</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/swagger" target="_blank"><i class="bi bi-file-earmark-code me-1"></i> Swagger API</a>
+                            <a class="nav-link" href="/swagger" target="_blank"><i class="bi bi-file-earmark-code me-1 text-warning"></i> Swagger API</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/health" target="_blank"><i class="bi bi-heart-pulse me-1"></i> System Health</a>
+                            <a class="nav-link" href="/api/health" target="_blank"><i class="bi bi-heart-pulse me-1 text-danger"></i> API Health</a>
                         </li>
                     </ul>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
-                            <i class="bi bi-check-circle-fill me-1"></i> AWS EC2 (systemd)
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-dark border border-secondary" style="font-size: 0.82rem;">
+                            <span class="pulse-indicator"></span>
+                            <span class="text-light fw-medium">Phase 2: Decoupled API</span>
+                        </div>
+                        <span class="badge badge-soft-primary px-3 py-2 rounded-pill d-none d-md-inline-block">
+                            <i class="bi bi-shield-check me-1"></i> systemd sandbox
                         </span>
                     </div>
                 </div>
@@ -80,11 +60,11 @@
         </main>
     </div>
 
-    <footer class="footer mt-auto py-3 bg-dark border-top border-secondary text-secondary">
-        <div class="container text-center text-md-start d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <span>&copy; 2026 - ASP.NET Core 8.0 MVC | MySQL | GitHub Actions CI/CD to AWS EC2</span>
-            <span class="small text-muted mt-2 mt-md-0">
-                <i class="bi bi-cpu me-1"></i> Non-containerized Kestrel &bull; <a href="/health" class="text-secondary text-decoration-none" target="_blank">Health Status</a>
+    <footer class="footer mt-auto py-3 bg-dark border-top border-secondary text-secondary" style="font-size: 0.85rem;">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+            <span>&copy; 2026 - <strong>ASP.NET Core 8.0 Decoupled Architecture</strong> &bull; Nginx Path Routing &bull; MySQL 8.0</span>
+            <span class="text-muted">
+                <i class="bi bi-cpu me-1"></i> systemd <code class="text-info">DynamicUser=yes</code> &bull; <a href="/health" class="text-secondary text-decoration-underline" target="_blank">Health Status</a>
             </span>
         </div>
     </footer>

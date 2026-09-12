@@ -2,147 +2,296 @@
     ViewData["Title"] = "DevOps CI/CD Dashboard";
 }
 
+<!-- Hero Section -->
 <div class="row g-4 mb-4">
     <div class="col-12">
-        <div class="card p-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-left: 5px solid #3b82f6 !important;">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                <div>
-                    <h2 class="fw-bold text-light mb-1">
-                        <i class="bi bi-rocket-takeoff text-primary me-2"></i>DevOps Deployment Tracker
-                    </h2>
-                    <p class="text-secondary mb-0">
-                        ASP.NET Core 8.0 MVC application automated via GitHub Actions CI/CD to AWS EC2 (systemd + Nginx) with MySQL persistence.
+        <div class="hero-card p-4 p-md-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-dark border border-secondary mb-3">
+                        <span class="pulse-indicator"></span>
+                        <span class="text-light small fw-semibold">Phase 2 Architecture Live</span>
+                        <span class="text-secondary">&bull;</span>
+                        <span class="text-primary small">Dual systemd Daemons</span>
+                    </div>
+                    <h1 class="fw-bold text-white mb-2 display-6">
+                        DevOps Release Telemetry & API Platform
+                    </h1>
+                    <p class="text-secondary mb-4 lead fs-6">
+                        Decoupled enterprise architecture combining an ASP.NET Core 8.0 MVC management portal with a dedicated RESTful API tier, unified EF Core domain, and container-grade Linux sandboxing.
                     </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a asp-controller="Deployments" asp-action="Index" class="btn btn-primary-gradient px-4 py-2">
+                            <i class="bi bi-stack me-2"></i>View Releases
+                        </a>
+                        <a href="/swagger" target="_blank" class="btn btn-glass px-4 py-2">
+                            <i class="bi bi-file-earmark-code me-2 text-warning"></i>Explore Swagger OpenAPI
+                        </a>
+                        <a href="/api/health" target="_blank" class="btn btn-glass px-4 py-2">
+                            <i class="bi bi-heart-pulse me-2 text-danger"></i>API Diagnostics
+                        </a>
+                    </div>
                 </div>
-                <div class="d-flex gap-2">
-                    <a asp-controller="Deployments" asp-action="Create" class="btn btn-primary px-3">
-                        <i class="bi bi-plus-lg me-1"></i> Log Deployment
-                    </a>
-                    <a asp-controller="Deployments" asp-action="Index" class="btn btn-outline-light px-3">
-                        <i class="bi bi-table me-1"></i> View All Records
-                    </a>
+                <div class="col-lg-4 mt-4 mt-lg-0">
+                    <div class="p-3 rounded-4 bg-dark bg-opacity-75 border border-secondary">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
+                            <span class="text-secondary small">Web Tier</span>
+                            <span class="badge badge-soft-primary">Kestrel :5000</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
+                            <span class="text-secondary small">REST API Tier</span>
+                            <span class="badge badge-soft-cyan">Kestrel :5050</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
+                            <span class="text-secondary small">Reverse Proxy</span>
+                            <span class="badge badge-soft-success">Nginx :80</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-secondary small">Database</span>
+                            <span class="badge badge-soft-warning">MySQL 8.0 (Pomelo)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Architecture Flow Cards -->
 <div class="row g-4 mb-4">
-    <div class="col-md-4">
-        <div class="card p-3 shadow-sm h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-secondary small text-uppercase fw-semibold">Continuous Integration</div>
-                    <h4 class="fw-bold text-light my-1">GitHub Actions</h4>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle">
-                        <i class="bi bi-check2 me-1"></i> Automated xUnit Tests Gate
-                    </span>
-                </div>
-                <div class="text-primary stat-icon">
-                    <i class="bi bi-git"></i>
-                </div>
+    <div class="col-md-3">
+        <div class="card card-glass p-3 h-100 stat-card">
+            <div class="text-secondary small text-uppercase fw-semibold">Traffic Ingress</div>
+            <h5 class="fw-bold text-light my-2">Nginx Reverse Proxy</h5>
+            <div class="d-flex align-items-center gap-2 mt-auto">
+                <span class="badge badge-soft-success font-mono">Port 80</span>
+                <span class="small text-secondary">Path routing</span>
             </div>
+            <i class="bi bi-hdd-network stat-icon text-success"></i>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card p-3 shadow-sm h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-secondary small text-uppercase fw-semibold">Compute & Hosting</div>
-                    <h4 class="fw-bold text-light my-1">AWS EC2 Linux</h4>
-                    <span class="badge bg-info-subtle text-info border border-info-subtle">
-                        <i class="bi bi-hdd-network me-1"></i> systemd + Kestrel (:5000)
-                    </span>
-                </div>
-                <div class="text-info stat-icon">
-                    <i class="bi bi-ubuntu"></i>
-                </div>
+    <div class="col-md-3">
+        <div class="card card-glass p-3 h-100 stat-card">
+            <div class="text-secondary small text-uppercase fw-semibold">Presentation Tier</div>
+            <h5 class="fw-bold text-light my-2">MVC Web Dashboard</h5>
+            <div class="d-flex align-items-center gap-2 mt-auto">
+                <span class="badge badge-soft-primary font-mono">dotnetapp.service</span>
             </div>
+            <i class="bi bi-window-sidebar stat-icon text-primary"></i>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card p-3 shadow-sm h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-secondary small text-uppercase fw-semibold">Database Engine</div>
-                    <h4 class="fw-bold text-light my-1">MySQL Database</h4>
-                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
-                        <i class="bi bi-database-check me-1"></i> EF Core Pomelo Provider
-                    </span>
-                </div>
-                <div class="text-warning stat-icon">
-                    <i class="bi bi-database"></i>
-                </div>
+    <div class="col-md-3">
+        <div class="card card-glass p-3 h-100 stat-card">
+            <div class="text-secondary small text-uppercase fw-semibold">API Services Tier</div>
+            <h5 class="fw-bold text-light my-2">RESTful Web API</h5>
+            <div class="d-flex align-items-center gap-2 mt-auto">
+                <span class="badge badge-soft-cyan font-mono">dotnetapi.service</span>
             </div>
+            <i class="bi bi-braces-asterisk stat-icon text-info"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-glass p-3 h-100 stat-card">
+            <div class="text-secondary small text-uppercase fw-semibold">Linux Sandboxing</div>
+            <h5 class="fw-bold text-light my-2">Container-Grade Isolation</h5>
+            <div class="d-flex align-items-center gap-2 mt-auto">
+                <span class="badge badge-soft-purple font-mono">DynamicUser=yes</span>
+            </div>
+            <i class="bi bi-shield-lock stat-icon text-purple"></i>
         </div>
     </div>
 </div>
 
-<div class="row g-4">
+<!-- Interactive API Tester & Architecture Section -->
+<div class="row g-4 mb-4">
+    <!-- Live REST API In-Browser Tester -->
     <div class="col-lg-7">
-        <div class="card p-4 shadow-sm h-100">
-            <h5 class="fw-bold text-light mb-3">
-                <i class="bi bi-diagram-3 text-primary me-2"></i>Architectural Evolution Roadmap
-            </h5>
-            <div class="timeline">
-                <div class="p-3 mb-3 rounded" style="background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6;">
-                    <div class="d-flex justify-content-between">
-                        <strong class="text-primary">Phase 1: ASP.NET Core MVC (Current)</strong>
-                        <span class="badge bg-primary">Active</span>
-                    </div>
-                    <p class="small text-secondary mt-1 mb-0">
-                        Monolithic MVC application with direct Entity Framework Core access, integrated Razor UI, automated xUnit tests, and complete GitHub Actions CI/CD to AWS EC2.
-                    </p>
-                </div>
-                <div class="p-3 mb-3 rounded" style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b;">
-                    <div class="d-flex justify-content-between">
-                        <strong class="text-warning">Phase 2: Decoupled REST Web API Tier</strong>
-                        <span class="badge bg-secondary">Upcoming</span>
-                    </div>
-                    <p class="small text-secondary mt-1 mb-0">
-                        Extract business logic into a dedicated REST API service project (`DotnetProject.Api`), enabling webhook endpoints for external CI tools and 3rd party clients.
-                    </p>
-                </div>
-                <div class="p-3 rounded" style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981;">
-                    <div class="d-flex justify-content-between">
-                        <strong class="text-success">Phase 3: Dedicated Data Access Layer (3-Tier)</strong>
-                        <span class="badge bg-secondary">Upcoming</span>
-                    </div>
-                    <p class="small text-secondary mt-1 mb-0">
-                        Full physical separation into Presentation Tier (Web/Mobile), Business Logic / API Tier, and Data Access Layer (`DotnetProject.Data`) with repository patterns.
-                    </p>
-                </div>
+        <div class="card card-glass p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-light mb-0">
+                    <i class="bi bi-terminal text-cyan-accent me-2"></i>Interactive REST API Explorer
+                </h5>
+                <span class="badge badge-soft-cyan">Live Endpoints</span>
             </div>
+            <p class="text-secondary small">
+                Test the Phase 2 REST API directly from your browser. Click any endpoint to query the background service:
+            </p>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button class="btn btn-sm btn-glass text-info" onclick="callApi('/api/deployments', 'GET')">
+                    <span class="badge bg-primary me-1">GET</span> /api/deployments
+                </button>
+                <button class="btn btn-sm btn-glass text-warning" onclick="callApi('/api/projects', 'GET')">
+                    <span class="badge bg-primary me-1">GET</span> /api/projects
+                </button>
+                <button class="btn btn-sm btn-glass text-success" onclick="callApi('/api/health', 'GET')">
+                    <span class="badge bg-success me-1">GET</span> /api/health
+                </button>
+                <button class="btn btn-sm btn-glass text-danger" onclick="triggerWebhookDemo()">
+                    <span class="badge bg-danger me-1">POST</span> /api/deployments/webhook
+                </button>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small text-secondary font-mono" id="apiEndpointLabel">Response Output</span>
+                <span class="badge bg-dark border border-secondary" id="apiStatusBadge">Ready</span>
+            </div>
+            <div class="console-output" id="apiResponseConsole">// Click any endpoint button above to test the REST API live...</div>
         </div>
     </div>
 
+    <!-- Security & Isolation Highlights -->
     <div class="col-lg-5">
-        <div class="card p-4 shadow-sm h-100">
+        <div class="card card-glass p-4 h-100">
             <h5 class="fw-bold text-light mb-3">
-                <i class="bi bi-activity text-danger me-2"></i>DevOps Health Status
+                <i class="bi bi-shield-shaded text-purple-accent me-2"></i>Bare-Metal systemd Isolation
             </h5>
-            <div class="d-flex flex-column gap-3">
-                <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2">
-                    <span class="text-secondary">Health Endpoint:</span>
-                    <a href="/health" class="btn btn-sm btn-outline-info" target="_blank">
-                        <code>GET /health</code>
-                    </a>
+            <p class="text-secondary small mb-3">
+                We achieve container-grade security isolation on bare Linux EC2 without Docker daemon RAM overhead:
+            </p>
+            <div class="d-flex flex-column gap-2">
+                <div class="p-2 rounded bg-dark bg-opacity-50 border border-secondary border-opacity-50">
+                    <div class="d-flex justify-content-between">
+                        <strong class="text-info font-mono small">DynamicUser=yes</strong>
+                        <span class="badge badge-soft-success">Active</span>
+                    </div>
+                    <span class="text-secondary small d-block">Ephemeral UID allocation on startup; destroyed upon shutdown.</span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2">
-                    <span class="text-secondary">Runtime:</span>
-                    <span class="text-light fw-medium">.NET 8.0 LTS Kestrel</span>
+                <div class="p-2 rounded bg-dark bg-opacity-50 border border-secondary border-opacity-50">
+                    <div class="d-flex justify-content-between">
+                        <strong class="text-info font-mono small">ProtectSystem=strict</strong>
+                        <span class="badge badge-soft-success">Active</span>
+                    </div>
+                    <span class="text-secondary small d-block">Entire root filesystem is mounted strictly read-only to Kestrel.</span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2">
-                    <span class="text-secondary">Service Daemon:</span>
-                    <span class="badge bg-dark border border-secondary text-secondary">systemd (Linux)</span>
+                <div class="p-2 rounded bg-dark bg-opacity-50 border border-secondary border-opacity-50">
+                    <div class="d-flex justify-content-between">
+                        <strong class="text-info font-mono small">ProtectHome=yes</strong>
+                        <span class="badge badge-soft-success">Active</span>
+                    </div>
+                    <span class="text-secondary small d-block">User directories (/home, /root) are inaccessible to processes.</span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-secondary">Quick Action:</span>
-                    <a asp-controller="Deployments" asp-action="Index" class="btn btn-sm btn-outline-primary">
-                        Browse Releases &rarr;
-                    </a>
+                <div class="p-2 rounded bg-dark bg-opacity-50 border border-secondary border-opacity-50">
+                    <div class="d-flex justify-content-between">
+                        <strong class="text-info font-mono small">NoNewPrivileges=true</strong>
+                        <span class="badge badge-soft-success">Active</span>
+                    </div>
+                    <span class="text-secondary small d-block">Prevents privilege escalation via SUID binaries.</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Architecture Roadmap -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card card-glass p-4">
+            <h5 class="fw-bold text-light mb-3">
+                <i class="bi bi-diagram-3 text-primary me-2"></i>Architecture Evolution Roadmap
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-3 rounded-3 h-100" style="background: rgba(59, 130, 246, 0.07); border: 1px solid rgba(59, 130, 246, 0.25);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong class="text-primary">Phase 1: MVC Monolith</strong>
+                            <span class="badge bg-secondary">Completed</span>
+                        </div>
+                        <p class="small text-secondary mb-0">
+                            Single MVC application with direct database operations, Razor views, and automated GitHub Actions CI/CD to AWS EC2.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded-3 h-100" style="background: rgba(6, 182, 212, 0.12); border: 2px solid #06b6d4;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong class="text-info">Phase 2: Decoupled REST API</strong>
+                            <span class="badge badge-soft-cyan">Current Phase</span>
+                        </div>
+                        <p class="small text-secondary mb-0">
+                            Dedicated REST Web API (`DotnetProject.Api`), Swagger OpenAPI, CI/CD webhook ingestion, dual systemd daemons, and Nginx path routing.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded-3 h-100" style="background: rgba(139, 92, 246, 0.07); border: 1px solid rgba(139, 92, 246, 0.25);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong class="text-purple-accent">Phase 3: 3-Tier Layered Design</strong>
+                            <span class="badge bg-secondary">Upcoming</span>
+                        </div>
+                        <p class="small text-secondary mb-0">
+                            Strict physical separation into Presentation, Business Logic/API, and Dedicated Data Access (`DotnetProject.Data`) layers.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    async function callApi(endpoint, method) {
+        const consoleEl = document.getElementById('apiResponseConsole');
+        const statusEl = document.getElementById('apiStatusBadge');
+        const labelEl = document.getElementById('apiEndpointLabel');
+
+        labelEl.innerText = `${method} ${endpoint}`;
+        statusEl.innerText = "Querying...";
+        statusEl.className = "badge bg-primary";
+        consoleEl.innerText = "Sending HTTP request to API tier...";
+
+        try {
+            const start = performance.now();
+            const res = await fetch(endpoint, { method: method });
+            const duration = Math.round(performance.now() - start);
+            const data = await res.json();
+
+            statusEl.innerText = `${res.status} ${res.statusText} (${duration}ms)`;
+            statusEl.className = res.ok ? "badge bg-success" : "badge bg-danger";
+            consoleEl.innerText = JSON.stringify(data, null, 2);
+        } catch (err) {
+            statusEl.innerText = "Error";
+            statusEl.className = "badge bg-danger";
+            consoleEl.innerText = `Fetch error: ${err.message}\n(Ensure API service is running on /api)`;
+        }
+    }
+
+    async function triggerWebhookDemo() {
+        const consoleEl = document.getElementById('apiResponseConsole');
+        const statusEl = document.getElementById('apiStatusBadge');
+        const labelEl = document.getElementById('apiEndpointLabel');
+
+        const payload = {
+            repository: "dotnet-devops-release-tracker",
+            releaseVersion: "v2.0." + Math.floor(Math.random() * 90 + 10),
+            environment: "Production",
+            status: "Successful",
+            commitSha: "feat-phase2-" + Math.floor(Math.random() * 1000),
+            actor: "github-actions[bot]",
+            summary: "Automated deployment telemetry posted via CI/CD webhook."
+        };
+
+        labelEl.innerText = "POST /api/deployments/webhook";
+        statusEl.innerText = "Posting...";
+        statusEl.className = "badge bg-warning text-dark";
+        consoleEl.innerText = "Posting simulated CI/CD webhook payload:\n" + JSON.stringify(payload, null, 2);
+
+        try {
+            const res = await fetch('/api/deployments/webhook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            statusEl.innerText = `${res.status} ${res.statusText}`;
+            statusEl.className = res.ok ? "badge bg-success" : "badge bg-danger";
+            consoleEl.innerText = "// Response from REST API Webhook Endpoint:\n" + JSON.stringify(data, null, 2);
+        } catch (err) {
+            statusEl.innerText = "Error";
+            statusEl.className = "badge bg-danger";
+            consoleEl.innerText = `Webhook error: ${err.message}`;
+        }
+    }
+</script>
+}

@@ -2,9 +2,9 @@ name: Build, Test & Deploy to AWS EC2
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feat/**" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "feat/**" ]
   workflow_dispatch:
 
 permissions:
@@ -37,15 +37,15 @@ jobs:
         run: dotnet test --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx" DotnetProject.sln
 
       - name: Publish Web Application Artifact
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         run: dotnet publish MVC/DotnetProject.Web.csproj --configuration Release -o ./publish-web
 
       - name: Publish REST API Artifact
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         run: dotnet publish DotnetProject.Api/DotnetProject.Api.csproj --configuration Release -o ./publish-api
 
       - name: Upload Web Build Artifact
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-web-release
@@ -53,7 +53,7 @@ jobs:
           retention-days: 7
 
       - name: Upload API Build Artifact
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-api-release
@@ -61,7 +61,7 @@ jobs:
           retention-days: 7
 
       - name: Upload Deployment Configuration Artifact
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: deploy-configs
@@ -75,7 +75,7 @@ jobs:
     name: Deploy to AWS EC2
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request'
     continue-on-error: true # Allows CI pipeline to pass even when EC2 instance is stopped for cloud cost savings
 
     steps:

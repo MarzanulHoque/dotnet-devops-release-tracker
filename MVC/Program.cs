@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using DotnetProject.Web.Data;
+using DotnetProject.Core.Data;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);

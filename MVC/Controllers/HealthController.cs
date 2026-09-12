@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DotnetProject.Web.Data;
+using DotnetProject.Core.Data;
 using System;
 using System.Diagnostics;
 using System.Reflection;

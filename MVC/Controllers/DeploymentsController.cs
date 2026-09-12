@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DotnetProject.Web.Data;
-using DotnetProject.Web.Models;
+using DotnetProject.Core.Data;
+using DotnetProject.Core.Entities;
 using System.Linq;
 using System.Threading.Tasks;
 

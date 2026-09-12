@@ -139,12 +139,8 @@ jobs:
             sudo systemctl stop dotnetapp.service || true
             sudo systemctl stop dotnetapi.service || true
 
-            echo "--- Applying systemd units, Nginx configuration & Database migrations ---"
+            echo "--- Applying systemd units & Nginx configuration ---"
             if [ -d /tmp/dotnet-deploy ]; then
-              if [ -f /tmp/dotnet-deploy/migration_phase2.sql ]; then
-                echo "Applying Phase 2 idempotent database migration..."
-                sudo mysql < /tmp/dotnet-deploy/migration_phase2.sql || true
-              fi
               if [ -f /tmp/dotnet-deploy/app.service ]; then
                 sudo cp /tmp/dotnet-deploy/app.service /etc/systemd/system/dotnetapp.service
               fi

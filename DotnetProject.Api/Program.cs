@@ -90,8 +90,16 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.EnsureCreated();
-        logger.LogInformation("REST API Database verified and seed data initialized.");
+        if (context.Database.IsRelational())
+        {
+            context.Database.Migrate();
+            logger.LogInformation("REST API Database migrations applied successfully.");
+        }
+        else
+        {
+            context.Database.EnsureCreated();
+            logger.LogInformation("In-Memory REST API Database initialized.");
+        }
     }
     catch (Exception ex)
     {

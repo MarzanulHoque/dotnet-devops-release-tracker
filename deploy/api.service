@@ -10,16 +10,18 @@ Restart=always
 RestartSec=10
 KillSignal=SIGINT
 SyslogIdentifier=dotnetapi
-User=www-data
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 Environment=ASPNETCORE_URLS=http://127.0.0.1:5050
 # Load database connection and secrets from secure server-only environment file
 EnvironmentFile=-/etc/dotnetapp.env
 
-# Security sandboxing
-ProtectSystem=full
+# Container-grade Linux Kernel isolation & sandboxing
+DynamicUser=yes
+ProtectSystem=strict
+ProtectHome=yes
 NoNewPrivileges=true
+PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target

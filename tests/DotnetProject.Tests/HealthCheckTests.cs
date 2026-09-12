@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotnetProject.Web.Controllers;
-using DotnetProject.Web.Data;
+using DotnetProject.Core.Data;
 using Xunit;
 
 namespace DotnetProject.Tests

@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotnetProject.Web.Controllers;
-using DotnetProject.Web.Data;
-using DotnetProject.Web.Models;
+using DotnetProject.Core.Data;
+using DotnetProject.Core.Entities;
 using Xunit;
 
 namespace DotnetProject.Tests

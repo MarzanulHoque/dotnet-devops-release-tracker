@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using DotnetProject.Web.Models;
+using DotnetProject.Core.Entities;
 using Xunit;
 
 namespace DotnetProject.Tests

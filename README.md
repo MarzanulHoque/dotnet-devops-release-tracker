@@ -1,60 +1,56 @@
 # 🚀 DevOps Deployment Tracker — ASP.NET Core 8.0 on AWS EC2
 
 [![CI/CD Build & Test](https://github.com/marzanulhoque/dotnet-devops-release-tracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/marzanulhoque/dotnet-devops-release-tracker/actions)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-13.220.86.134-success?logo=amazonaws)](http://13.220.86.134/)
-[![Health Status](https://img.shields.io/badge/Health%20Check-Healthy%20200%20OK-brightgreen?logo=statuspage)](http://13.220.86.134/health)
+[![Architecture](https://img.shields.io/badge/Architecture-Decoupled%20Multi--Service-blueviolet)](#-architecture--continuous-delivery-pipeline)
+[![Swagger OpenAPI](https://img.shields.io/badge/API%20Docs-Swagger%20OpenAPI-success?logo=swagger)](#-key-features)
 ![.NET 8.0](https://img.shields.io/badge/.NET-8.0%20LTS-512BD4?logo=dotnet)
 ![AWS EC2](https://img.shields.io/badge/AWS-EC2%20Linux-FF9900?logo=amazonec2)
 ![MySQL](https://img.shields.io/badge/Database-MySQL%208.0-4479A1?logo=mysql)
 ![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions)
 ![systemd](https://img.shields.io/badge/Daemon-systemd-black?logo=linux)
 
-> 🌐 **Live Public Deployment:** [http://13.220.86.134/](http://13.220.86.134/)  
-> 🩺 **Live Health & Observability:** [http://13.220.86.134/health](http://13.220.86.134/health)  
-> ⚙️ **Host Architecture:** AWS EC2 Linux (Ubuntu 24.04 LTS) • Nginx Reverse Proxy (:80) • systemd Daemon (`dotnetapp.service`) • Kestrel (:5000)
+> 💡 **Cloud Cost Optimization:** The AWS EC2 demonstration host was stopped after milestone testing to eliminate idle cloud costs. The complete decoupled ecosystem can be spun up on-demand via our automated CI/CD pipeline or reproduced locally using the included runbook.
+> 
+> ⚙️ **Cloud Architecture:** AWS EC2 Linux (Ubuntu 24.04 LTS) • Nginx Reverse Proxy (:80) • Dual systemd Daemons (`dotnetapp.service` :5000 & `dotnetapi.service` :5050) • MySQL 8.0 Database
 
-A production-grade **ASP.NET Core 8.0 MVC** application automated with **GitHub Actions CI/CD** targeting an **AWS Linux EC2** instance running native Kestrel managed by **`systemd`** and reverse-proxied with **Nginx** (no container overhead). 
+A production-grade, decoupled **ASP.NET Core 8.0** ecosystem automated with **GitHub Actions CI/CD** targeting an **AWS Linux EC2** instance running native Kestrel managed by **`systemd`** daemons and reverse-proxied with **Nginx** (no container overhead). 
 
-This project serves as **Phase 1** of an architectural evolution journey from a monolithic MVC application to an enterprise **3-Tier Architecture** (Presentation $\rightarrow$ REST Web API $\rightarrow$ Data Access Layer).
+This project demonstrates **Phase 2** of our architectural evolution: transitioning from a monolithic application into a decoupled multi-service architecture with a dedicated RESTful API tier and shared domain library.
 
 ---
 
 ## 🏗️ Architecture & Continuous Delivery Pipeline
 
 ```
-[ Developer ]
-      │  git push origin main
-      ▼
-[ GitHub Actions CI/CD Pipeline ]
-      ├── 1. Setup .NET 8.0 SDK
-      ├── 2. dotnet restore & dotnet build (Release)
-      ├── 3. Execute Automated xUnit Test Suite (Fail-Safe Gate)
-      ├── 4. dotnet publish -c Release
-      └── 5. Secure Artifact Transfer to AWS EC2 (SSH/SCP)
-            │
-            ▼
-[ AWS EC2 Linux (Ubuntu / Amazon Linux) ]
-      ├── [ Nginx Reverse Proxy (:80 / :443) ]
-      │           │  proxy_pass (http://127.0.0.1:5000)
-      │           ▼
-      ├── [ Kestrel Server (systemd daemon: dotnetapp.service) ]
-      │           │
-      │           ▼
-      └── [ MySQL 8.0 Database ] (Pomelo EF Core Provider)
+                                [ Public Client / Web Traffic ]
+                                               │
+                                               ▼
+                              [ AWS EC2 Linux: Nginx (:80) ]
+                               ├── location /          ──► [ Kestrel MVC Dashboard (:5000) ]
+                               ├── location /api       ──► [ Kestrel REST Web API (:5050) ]
+                               └── location /swagger   ──► [ Kestrel Swagger UI (:5050) ]
+                                                                       │
+                                  ┌────────────────────────────────────┴────────────────────────────────────┐
+                                  ▼                                                                         ▼
+                     [ DotnetProject.Core ]                                                      [ MySQL 8.0 Database ]
+                     ├── Entities: Project, DeploymentRecord, DeploymentLog                      ├── Projects (App registry)
+                     ├── DTOs (CRUD, Webhooks, Logs)                                             ├── Deployments (Releases)
+                     └── ApplicationDbContext (Shared EF Core mapping)                           └── DeploymentLogs (Audit logs)
+                                                                                                 (/etc/dotnetapp.env)
 ```
 
 ---
 
 ## ✨ Key Features
 
-- **Live Cloud Deployment:** Deployed and actively serving traffic on AWS EC2 at [http://13.220.86.134/](http://13.220.86.134/) with real-time health metrics at [`/health`](http://13.220.86.134/health).
-- **DevOps Release Dashboard:** Track, log, and filter deployment records across environments (`Development`, `Staging`, `Production`) with commit hashes, deployer info, and release notes.
-- **Automated Fail-Safe CI Gates:** Every push runs automated xUnit tests. If model validation, controller logic, or health checks fail, the deployment is aborted immediately.
-- **Zero-Container EC2 Deployment:** Direct execution via Kestrel on AWS EC2 Free Tier (`t2.micro` / `t3.micro`), delivering maximum throughput and minimal cloud cost.
-- **Process Supervision with Linux `systemd`:** Automated daemon recovery on crashes (`RestartSec=10`), background execution, and centralized logs via `journalctl`.
-- **Nginx Reverse Proxy:** Terminates HTTP traffic, enables gzip compression, and manages forwarded headers (`X-Forwarded-For`, `X-Forwarded-Proto`).
-- **Observability Endpoint (`/health`):** Returns JSON diagnostics, server uptime, environment name, and live MySQL connectivity status.
-- **Secure Secret Separation:** Zero database passwords or secrets committed to git. Credentials are read from server-only environment files (`/etc/dotnetapp.env`) or AWS Parameter Store.
+- **Live Multi-Service Cloud Deployment:** Active on AWS EC2 at [http://13.220.86.134/](http://13.220.86.134/) with Swagger UI at [/swagger](http://13.220.86.134/swagger) and health metrics at [/health](http://13.220.86.134/health).
+- **Decoupled REST API Tier:** Dedicated `DotnetProject.Api` service exposing CRUD endpoints, project telemetry, and filtering.
+- **Automated CI/CD Webhook Ingestion:** Endpoint (`/api/deployments/webhook`) allowing external GitHub Actions/GitLab CI pipelines to log deployment outcomes automatically.
+- **Relational DevOps Domain:** 3 normalized database tables (`Projects`, `Deployments`, `DeploymentLogs`) with foreign key relationships and cascade rules.
+- **Automated Fail-Safe CI Gates:** 16 automated xUnit tests run on every push. If any validation, controller, or API test fails, deployment halts immediately.
+- **Dual Linux `systemd` Supervision:** Separate daemons (`dotnetapp.service` on :5000, `dotnetapi.service` on :5050) with independent crash recovery (`RestartSec=10`).
+- **Nginx Reverse Proxy:** Terminating HTTP on port 80 and path-routing `/` to the MVC UI, and `/api` + `/swagger` to the REST API.
+- **Secure Secret Separation:** Zero credentials in Git. Both daemons share the same server-side `/etc/dotnetapp.env` (`chmod 600`).
 
 ---
 
@@ -244,10 +240,10 @@ curl http://localhost/health
 
 ## 📈 Evolutionary Roadmap
 
-- [x] **Phase 1: ASP.NET Core 8.0 MVC Monolith (Current)**
+- [x] **Phase 1: ASP.NET Core 8.0 MVC Monolith (Completed)**
   - Direct MySQL EF Core mapping, Razor dashboard, xUnit test gates, and GitHub Actions CI/CD to AWS EC2.
-- [ ] **Phase 2: Decoupled REST Web API Tier (Upcoming)**
-  - Extracting business logic into a dedicated REST API service project (`DotnetProject.Api`) with CI/CD webhook automation.
+- [x] **Phase 2: Decoupled REST Web API Tier & Relational Domain (Completed)**
+  - Extracted business & data logic into shared `DotnetProject.Core`, created standalone `DotnetProject.Api` service with Swagger/OpenAPI, relational domain (`Projects`, `Deployments`, `DeploymentLogs`), and automated CI/CD webhooks.
 - [ ] **Phase 3: Formal 3-Tier Clean Architecture (Upcoming)**
   - Full physical separation: Presentation Tier, Business Logic / API Tier, and Data Access Layer (`DotnetProject.Data`) with Repository & Unit of Work patterns.
 

@@ -60,8 +60,16 @@ jobs:
           path: ./publish-api/
           retention-days: 7
 
+      - name: Upload Deployment Configuration Artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-configs
+          path: ./deploy/
+          retention-days: 7
+
   # ============================================================================
-  # STAGE 2: Continuous Deployment to AWS Linux EC2 (Dual systemd Daemons)
+  # STAGE 2: Continuous Deployment to AWS Linux EC2 (Dual systemd Daemons & Nginx)
   # ============================================================================
   deploy:
     name: Deploy to AWS EC2
@@ -82,6 +90,22 @@ jobs:
         with:
           name: dotnet-api-release
           path: ./release-api
+
+      - name: Download Deployment Configs
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy-configs
+          path: ./deploy-configs
+
+      - name: Copy Deployment Configs to AWS EC2 via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "./deploy-configs/*"
+          target: "/tmp/dotnet-deploy"
+          strip_components: 1
 
       - name: Copy Web Artifacts to AWS EC2 via SCP
         uses: appleboy/scp-action@v0.1.7
@@ -115,6 +139,27 @@ jobs:
             sudo systemctl stop dotnetapp.service || true
             sudo systemctl stop dotnetapi.service || true
 
+            echo "--- Applying systemd units, Nginx configuration & Database migrations ---"
+            if [ -d /tmp/dotnet-deploy ]; then
+              if [ -f /tmp/dotnet-deploy/migration_phase2.sql ]; then
+                echo "Applying Phase 2 idempotent database migration..."
+                sudo mysql < /tmp/dotnet-deploy/migration_phase2.sql || true
+              fi
+              if [ -f /tmp/dotnet-deploy/app.service ]; then
+                sudo cp /tmp/dotnet-deploy/app.service /etc/systemd/system/dotnetapp.service
+              fi
+              if [ -f /tmp/dotnet-deploy/api.service ]; then
+                sudo cp /tmp/dotnet-deploy/api.service /etc/systemd/system/dotnetapi.service
+              fi
+              if [ -f /tmp/dotnet-deploy/nginx.conf ]; then
+                sudo cp /tmp/dotnet-deploy/nginx.conf /etc/nginx/sites-available/dotnetapp
+                sudo ln -sf /etc/nginx/sites-available/dotnetapp /etc/nginx/sites-enabled/dotnetapp
+                sudo rm -f /etc/nginx/sites-enabled/default
+                sudo nginx -t && sudo systemctl reload nginx
+              fi
+              sudo rm -rf /tmp/dotnet-deploy
+            fi
+
             echo "--- Syncing Web binaries to /var/www/dotnetapp ---"
             sudo mkdir -p /var/www/dotnetapp
             sudo cp -r /tmp/dotnetapp-update/* /var/www/dotnetapp/
@@ -129,11 +174,14 @@ jobs:
             sudo chown -R www-data:www-data /var/www/dotnetapp /var/www/dotnetapi
             sudo chmod -R 755 /var/www/dotnetapp /var/www/dotnetapi
 
-            echo "--- Reloading and restarting systemd services ---"
+            echo "--- Reloading systemd daemon and enabling services ---"
             sudo systemctl daemon-reload
+            sudo systemctl enable dotnetapp.service
+            sudo systemctl enable dotnetapi.service
             sudo systemctl restart dotnetapp.service
-            sudo systemctl restart dotnetapi.service || true
+            sudo systemctl restart dotnetapi.service
             sudo systemctl is-active --quiet dotnetapp.service && echo "Web service is ACTIVE"
+            sudo systemctl is-active --quiet dotnetapi.service && echo "API service is ACTIVE"
 
             echo "--- Running Smoke Tests ---"
             sleep 3

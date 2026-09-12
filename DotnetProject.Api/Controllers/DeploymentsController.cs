@@ -192,14 +192,13 @@ namespace DotnetProject.Api.Controllers
             }
 
             record.Status = dto.Status.Trim();
-            if (dto.Notes != null)
-            {
-                record.Notes = dto.Notes;
-            }
-            if (dto.ExecutionDurationSeconds.HasValue)
-            {
-                record.ExecutionDurationSeconds = dto.ExecutionDurationSeconds.Value;
-            }
+            if (!string.IsNullOrWhiteSpace(dto.AppName)) record.AppName = dto.AppName.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Version)) record.Version = dto.Version.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Environment)) record.Environment = dto.Environment.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.DeployedBy)) record.DeployedBy = dto.DeployedBy.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.CommitHash)) record.CommitHash = dto.CommitHash.Trim();
+            if (dto.Notes != null) record.Notes = dto.Notes;
+            if (dto.ExecutionDurationSeconds.HasValue) record.ExecutionDurationSeconds = dto.ExecutionDurationSeconds.Value;
 
             await _context.SaveChangesAsync();
             return NoContent();

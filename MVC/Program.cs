@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using DotnetProject.Core.Data;
+using DotnetProject.Web.Services;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,31 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHealthChecks();
 
-// 2. Configure Database Context (MySQL with Pomelo EF Core, injected via AWS / Environment Variables)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var dbProvider = builder.Configuration["DatabaseProvider"];
-
-if (string.IsNullOrWhiteSpace(connectionString) || string.Equals(dbProvider, "InMemory", StringComparison.OrdinalIgnoreCase))
+// 2. Configure Typed HTTP Client for the REST API Tier (3-Tier Architecture)
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://127.0.0.1:5050";
+builder.Services.AddHttpClient<IDeploymentApiClient, DeploymentApiClient>(client =>
 {
-    // If no connection string is provided via AWS or environment variables, fallback gracefully to in-memory DB
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseInMemoryDatabase("DevOpsDeploymentsDb"));
-}
-else
-{
-    // MySQL configuration with retry logic for resilient AWS cloud deployment
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    {
-        var serverVersion = new MySqlServerVersion(new Version(8, 0, 36));
-        options.UseMySql(connectionString, serverVersion, mySqlOptions =>
-        {
-            mySqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 3,
-                maxRetryDelay: TimeSpan.FromSeconds(5),
-                errorNumbersToAdd: null);
-        });
-    });
-}
+    client.BaseAddress = new Uri(apiBaseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
 
 // 3. Configure Forwarded Headers for Nginx Reverse Proxy (AWS EC2 deployment)
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -50,32 +30,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 
-// 4. Database auto-initialization / schema check
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    try
-    {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        if (context.Database.IsRelational())
-        {
-            context.Database.Migrate();
-            logger.LogInformation("Database migrations applied successfully.");
-        }
-        else
-        {
-            context.Database.EnsureCreated();
-            logger.LogInformation("In-Memory Database verified and schema initialized.");
-        }
-    }
-    catch (Exception ex)
-    {
-        logger.LogWarning("Database connection failed during startup (Ensure MySQL is running): {Message}", ex.Message);
-    }
-}
-
-// 5. Middleware Pipeline
+// 4. Middleware Pipeline
 app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())

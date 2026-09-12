@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DotnetProject.Core.Data;
+using DotnetProject.Web.Services;
 using System;
-using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -12,51 +10,39 @@ namespace DotnetProject.Web.Controllers
     [Route("[controller]")]
     public class HealthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDeploymentApiClient _apiClient;
         private static readonly DateTime StartTime = DateTime.UtcNow;
 
-        public HealthController(ApplicationDbContext context)
+        public HealthController(IDeploymentApiClient apiClient)
         {
-            _context = context;
+            _apiClient = apiClient;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var canConnectToDb = false;
-            string dbStatusMessage;
-
-            try
-            {
-                canConnectToDb = await _context.Database.CanConnectAsync();
-                dbStatusMessage = canConnectToDb ? "Connected" : "Unreachable";
-            }
-            catch (Exception ex)
-            {
-                dbStatusMessage = $"Connection failed: {ex.Message}";
-            }
-
+            var apiHealthy = await _apiClient.HealthCheckAsync();
             var uptime = DateTime.UtcNow - StartTime;
             var assembly = Assembly.GetExecutingAssembly().GetName();
 
             var healthReport = new
             {
-                status = canConnectToDb ? "Healthy" : "Degraded",
+                status = apiHealthy ? "Healthy" : "Degraded",
                 timestamp = DateTime.UtcNow.ToString("o"),
                 service = assembly.Name ?? "DotnetProject.Web",
-                version = assembly.Version?.ToString() ?? "1.0.0",
+                version = assembly.Version?.ToString() ?? "2.0.0",
                 environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
+                architecture = "3-Tier (MVC ──► REST API ──► MySQL)",
                 uptime = $"{uptime.Days}d {uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s",
                 hostname = Environment.MachineName,
-                database = new
+                apiTier = new
                 {
-                    provider = _context.Database.ProviderName,
-                    connected = canConnectToDb,
-                    message = dbStatusMessage
+                    connected = apiHealthy,
+                    status = apiHealthy ? "Online" : "Unreachable"
                 }
             };
 
-            return canConnectToDb ? Ok(healthReport) : StatusCode(200, healthReport);
+            return apiHealthy ? Ok(healthReport) : StatusCode(200, healthReport);
         }
     }
 }

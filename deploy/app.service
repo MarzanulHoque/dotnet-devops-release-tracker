@@ -13,6 +13,7 @@ SyslogIdentifier=dotnetapp
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 Environment=ASPNETCORE_URLS=http://127.0.0.1:5000
+Environment=ApiSettings__BaseUrl=http://127.0.0.1:5050
 EnvironmentFile=-/etc/dotnetapp.env
 
 # Container-grade Linux Kernel isolation & sandboxing

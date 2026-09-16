@@ -283,6 +283,100 @@ code, pre, .font-mono {
     background: rgba(15, 23, 42, 0.9);
 }
 
+/* Architecture Flow Ribbon */
+.arch-flow-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.arch-tier-card {
+    flex: 1 1 200px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--border-color);
+    border-radius: 0.875rem;
+    padding: 1.25rem;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    transition: all 0.25s ease;
+}
+
+.arch-tier-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--cyan-accent);
+    box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.2);
+}
+
+.arch-tier-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-top-left-radius: 0.875rem;
+    border-top-right-radius: 0.875rem;
+}
+
+.arch-tier-card.tier-nginx::before {
+    background: linear-gradient(90deg, #10b981, #06b6d4);
+}
+
+.arch-tier-card.tier-mvc::before {
+    background: linear-gradient(90deg, #3b82f6, #6366f1);
+}
+
+.arch-tier-card.tier-api::before {
+    background: linear-gradient(90deg, #06b6d4, #8b5cf6);
+}
+
+.arch-tier-card.tier-db::before {
+    background: linear-gradient(90deg, #f59e0b, #ef4444);
+}
+
+.arch-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 1.25rem;
+}
+
+@media (max-width: 991px) {
+    .arch-connector {
+        display: none;
+    }
+}
+
+/* Gradient Text */
+.text-gradient-cyan {
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-primary {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-emerald {
+    background: linear-gradient(135deg, #34d399 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Stat Counter Numbers */
+.stat-counter-val {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
 /* API Tester console output */
 .console-output {
     background: #020617;

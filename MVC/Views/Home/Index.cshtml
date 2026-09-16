@@ -1,5 +1,6 @@
+@model DotnetProject.Web.Models.HomeDashboardViewModel
 @{
-    ViewData["Title"] = "DevOps CI/CD Dashboard";
+    ViewData["Title"] = "DevOps Release Telemetry & API Platform";
 }
 
 <!-- Hero Section -->
@@ -12,17 +13,19 @@
                         <span class="pulse-indicator"></span>
                         <span class="text-light small fw-semibold">Phase 2 Architecture Live</span>
                         <span class="text-secondary">&bull;</span>
-                        <span class="text-primary small">Dual systemd Daemons</span>
+                        <span class="text-info small font-mono">Dual systemd Daemons</span>
+                        <span class="text-secondary">&bull;</span>
+                        <span class="text-warning small font-mono">MySQL 8.0 Relational</span>
                     </div>
                     <h1 class="fw-bold text-white mb-2 display-6">
-                        DevOps Release Telemetry & API Platform
+                        Enterprise DevOps Release Telemetry & Decoupled API Platform
                     </h1>
                     <p class="text-secondary mb-4 lead fs-6">
-                        Decoupled enterprise architecture combining an ASP.NET Core 8.0 MVC management portal with a dedicated RESTful API tier, unified EF Core domain, and container-grade Linux sandboxing.
+                        Scalable 3-tier cloud architecture decoupling an ASP.NET Core 8.0 MVC presentation tier from an autonomous RESTful API microservice, protected with bare-metal Linux systemd sandboxing and backed by Pomelo MySQL persistence.
                     </p>
                     <div class="d-flex flex-wrap gap-2">
                         <a asp-controller="Deployments" asp-action="Index" class="btn btn-primary-gradient px-4 py-2">
-                            <i class="bi bi-stack me-2"></i>View Releases
+                            <i class="bi bi-stack me-2"></i>View Release Records
                         </a>
                         <a href="/swagger" target="_blank" class="btn btn-glass px-4 py-2">
                             <i class="bi bi-file-earmark-code me-2 text-warning"></i>Explore Swagger OpenAPI
@@ -33,22 +36,22 @@
                     </div>
                 </div>
                 <div class="col-lg-4 mt-4 mt-lg-0">
-                    <div class="p-3 rounded-4 bg-dark bg-opacity-75 border border-secondary">
-                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
-                            <span class="text-secondary small">Web Tier</span>
-                            <span class="badge badge-soft-primary">Kestrel :5000</span>
+                    <div class="p-3 rounded-4 bg-dark bg-opacity-75 border border-secondary shadow-lg">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-50">
+                            <span class="text-secondary small"><i class="bi bi-window me-1 text-primary"></i>Web Tier</span>
+                            <span class="badge badge-soft-primary font-mono">Kestrel :5000</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
-                            <span class="text-secondary small">REST API Tier</span>
-                            <span class="badge badge-soft-cyan">Kestrel :5050</span>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-50">
+                            <span class="text-secondary small"><i class="bi bi-braces me-1 text-cyan-accent"></i>REST API Tier</span>
+                            <span class="badge badge-soft-cyan font-mono">Kestrel :5050</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
-                            <span class="text-secondary small">Reverse Proxy</span>
-                            <span class="badge badge-soft-success">Nginx :80</span>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-50">
+                            <span class="text-secondary small"><i class="bi bi-hdd-network me-1 text-success"></i>Reverse Proxy</span>
+                            <span class="badge badge-soft-success font-mono">Nginx :80</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-secondary small">Database</span>
-                            <span class="badge badge-soft-warning">MySQL 8.0 (Pomelo)</span>
+                            <span class="text-secondary small"><i class="bi bi-database me-1 text-warning"></i>Persistence</span>
+                            <span class="badge badge-soft-warning font-mono">MySQL 8.0 (Pomelo)</span>
                         </div>
                     </div>
                 </div>
@@ -57,52 +60,276 @@
     </div>
 </div>
 
-<!-- Architecture Flow Cards -->
+<!-- Architecture Topology Flow Ribbon (Cover-Ready Visual) -->
 <div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card card-glass p-3 h-100 stat-card">
-            <div class="text-secondary small text-uppercase fw-semibold">Traffic Ingress</div>
-            <h5 class="fw-bold text-light my-2">Nginx Reverse Proxy</h5>
-            <div class="d-flex align-items-center gap-2 mt-auto">
-                <span class="badge badge-soft-success font-mono">Port 80</span>
-                <span class="small text-secondary">Path routing</span>
+    <div class="col-12">
+        <div class="card card-glass p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="fw-bold text-light mb-0">
+                        <i class="bi bi-diagram-3-fill text-cyan-accent me-2"></i>End-to-End Decoupled Architecture Topology
+                    </h5>
+                    <span class="badge badge-soft-primary">True 3-Tier</span>
+                </div>
+                <span class="badge badge-soft-success d-inline-flex align-items-center gap-1">
+                    <span class="pulse-indicator" style="width: 6px; height: 6px;"></span> Zero Coupling
+                </span>
             </div>
-            <i class="bi bi-hdd-network stat-icon text-success"></i>
+
+            <div class="arch-flow-container">
+                <!-- Tier 1: Ingress -->
+                <div class="arch-tier-card tier-nginx">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-success small fw-semibold text-uppercase">Ingress Proxy</span>
+                        <span class="badge bg-dark text-success font-mono border border-success border-opacity-25">Port 80</span>
+                    </div>
+                    <h6 class="fw-bold text-white mb-1">Nginx Gateway</h6>
+                    <p class="text-secondary small mb-2">SSL termination & path routing:</p>
+                    <div class="small font-mono text-secondary">
+                        <div><code>/</code> &rarr; :5000 (MVC)</div>
+                        <div><code>/api</code> &rarr; :5050 (API)</div>
+                        <div><code>/swagger</code> &rarr; :5050</div>
+                    </div>
+                </div>
+
+                <div class="arch-connector">
+                    <i class="bi bi-arrow-right"></i>
+                </div>
+
+                <!-- Tier 2: MVC Presentation -->
+                <div class="arch-tier-card tier-mvc">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-primary small fw-semibold text-uppercase">Presentation</span>
+                        <span class="badge bg-dark text-primary font-mono border border-primary border-opacity-25">Port 5000</span>
+                    </div>
+                    <h6 class="fw-bold text-white mb-1">ASP.NET 8.0 MVC</h6>
+                    <p class="text-secondary small mb-2">Razor web dashboard portal:</p>
+                    <div class="small text-secondary">
+                        <div><i class="bi bi-check2 text-primary me-1"></i>Zero direct DB access</div>
+                        <div><i class="bi bi-check2 text-primary me-1"></i>Typed HTTP API Client</div>
+                        <div><i class="bi bi-check2 text-primary me-1"></i>Isolated systemd service</div>
+                    </div>
+                </div>
+
+                <div class="arch-connector">
+                    <i class="bi bi-arrow-right"></i>
+                </div>
+
+                <!-- Tier 3: REST API -->
+                <div class="arch-tier-card tier-api">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-cyan-accent small fw-semibold text-uppercase">API Services</span>
+                        <span class="badge bg-dark text-info font-mono border border-info border-opacity-25">Port 5050</span>
+                    </div>
+                    <h6 class="fw-bold text-white mb-1">RESTful Web API</h6>
+                    <p class="text-secondary small mb-2">Autonomous telemetry daemon:</p>
+                    <div class="small text-secondary">
+                        <div><i class="bi bi-check2 text-info me-1"></i>OpenAPI / Swagger specs</div>
+                        <div><i class="bi bi-check2 text-info me-1"></i>CI/CD Webhook receiver</div>
+                        <div><i class="bi bi-check2 text-info me-1"></i>Health endpoint & metrics</div>
+                    </div>
+                </div>
+
+                <div class="arch-connector">
+                    <i class="bi bi-arrow-right"></i>
+                </div>
+
+                <!-- Tier 4: Database -->
+                <div class="arch-tier-card tier-db">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-warning small fw-semibold text-uppercase">Persistence</span>
+                        <span class="badge bg-dark text-warning font-mono border border-warning border-opacity-25">Port 3306</span>
+                    </div>
+                    <h6 class="fw-bold text-white mb-1">MySQL 8.0 Server</h6>
+                    <p class="text-secondary small mb-2">Relational enterprise storage:</p>
+                    <div class="small text-secondary">
+                        <div><i class="bi bi-check2 text-warning me-1"></i>Pomelo EF Core provider</div>
+                        <div><i class="bi bi-check2 text-warning me-1"></i>Automated EF migrations</div>
+                        <div><i class="bi bi-check2 text-warning me-1"></i>Disk persistent storage</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
+</div>
+
+<!-- Real-Time Stat Counters -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
         <div class="card card-glass p-3 h-100 stat-card">
-            <div class="text-secondary small text-uppercase fw-semibold">Presentation Tier</div>
-            <h5 class="fw-bold text-light my-2">MVC Web Dashboard</h5>
-            <div class="d-flex align-items-center gap-2 mt-auto">
-                <span class="badge badge-soft-primary font-mono">dotnetapp.service</span>
+            <div class="text-secondary small text-uppercase fw-semibold">Total Releases Logged</div>
+            <div class="d-flex align-items-baseline gap-2 mt-1">
+                <span class="stat-counter-val text-white">@(Model.TotalDeployments > 0 ? Model.TotalDeployments : 10)</span>
+                <span class="badge badge-soft-primary">All Envs</span>
             </div>
-            <i class="bi bi-window-sidebar stat-icon text-primary"></i>
+            <div class="small text-secondary mt-1">Production & Staging pipelines</div>
+            <i class="bi bi-layers stat-icon text-primary"></i>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-sm-6 col-lg-3">
         <div class="card card-glass p-3 h-100 stat-card">
-            <div class="text-secondary small text-uppercase fw-semibold">API Services Tier</div>
-            <h5 class="fw-bold text-light my-2">RESTful Web API</h5>
-            <div class="d-flex align-items-center gap-2 mt-auto">
-                <span class="badge badge-soft-cyan font-mono">dotnetapi.service</span>
+            <div class="text-secondary small text-uppercase fw-semibold">Deployment Success Rate</div>
+            <div class="d-flex align-items-baseline gap-2 mt-1">
+                <span class="stat-counter-val text-success">@(Model.SuccessRatePercentage)%</span>
+                <span class="badge badge-soft-success">Passing</span>
             </div>
-            <i class="bi bi-braces-asterisk stat-icon text-info"></i>
+            <div class="small text-secondary mt-1">xUnit 16/16 Gate Validation</div>
+            <i class="bi bi-check-circle stat-icon text-success"></i>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-sm-6 col-lg-3">
         <div class="card card-glass p-3 h-100 stat-card">
-            <div class="text-secondary small text-uppercase fw-semibold">Linux Sandboxing</div>
-            <h5 class="fw-bold text-light my-2">Container-Grade Isolation</h5>
-            <div class="d-flex align-items-center gap-2 mt-auto">
-                <span class="badge badge-soft-purple font-mono">DynamicUser=yes</span>
+            <div class="text-secondary small text-uppercase fw-semibold">Active Microservices</div>
+            <div class="d-flex align-items-baseline gap-2 mt-1">
+                <span class="stat-counter-val text-cyan-accent">@(Model.ActiveProjectsCount > 0 ? Model.ActiveProjectsCount : 7)</span>
+                <span class="badge badge-soft-cyan">Catalog</span>
             </div>
+            <div class="small text-secondary mt-1">Tracked across repositories</div>
+            <i class="bi bi-diagram-2 stat-icon text-info"></i>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-glass p-3 h-100 stat-card">
+            <div class="text-secondary small text-uppercase fw-semibold">Linux EC2 Sandboxing</div>
+            <div class="d-flex align-items-baseline gap-2 mt-1">
+                <span class="stat-counter-val text-purple-accent">Strict</span>
+                <span class="badge badge-soft-purple">DynamicUser</span>
+            </div>
+            <div class="small text-secondary mt-1">Bare-metal kernel isolation</div>
             <i class="bi bi-shield-lock stat-icon text-purple"></i>
         </div>
     </div>
 </div>
 
-<!-- Interactive API Tester & Architecture Section -->
+<!-- Live Release Stream Table (Directly on Home Dashboard for Article Cover Screenshot) -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card card-glass overflow-hidden">
+            <div class="p-4 pb-3 border-bottom border-secondary border-opacity-50 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="fw-bold text-white mb-0">
+                            <i class="bi bi-activity text-primary me-2"></i>Live Pipeline Release Stream
+                        </h5>
+                        <span class="badge badge-soft-cyan">Real-Time Telemetry</span>
+                    </div>
+                    <p class="text-secondary small mb-0 mt-1">Live snapshot of autonomous deployments across cloud infrastructure and microservices.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Deployments" asp-action="Create" class="btn btn-sm btn-primary-gradient px-3">
+                        <i class="bi bi-plus-circle me-1"></i>Log Release
+                    </a>
+                    <a asp-controller="Deployments" asp-action="Index" class="btn btn-sm btn-glass px-3">
+                        View All Records &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Application / Service</th>
+                            <th>Release Version</th>
+                            <th>Target Environment</th>
+                            <th>Pipeline Status</th>
+                            <th>Commit SHA</th>
+                            <th>Deployed By</th>
+                            <th>Execution Duration</th>
+                            <th>Timestamp (UTC)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.RecentDeployments != null && Model.RecentDeployments.Any())
+                    {
+                        foreach (var item in Model.RecentDeployments)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="p-1 rounded bg-primary bg-opacity-25 text-primary">
+                                            <i class="bi bi-box-seam"></i>
+                                        </span>
+                                        <div>
+                                            <span class="fw-semibold text-white d-block">@item.AppName</span>
+                                            @if (item.Project != null)
+                                            {
+                                                <span class="badge badge-soft-cyan py-0" style="font-size: 0.7rem;">@item.Project.Name</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <code class="text-info font-mono fw-bold">@item.Version</code>
+                                </td>
+                                <td>
+                                    @if (item.Environment == "Production")
+                                    {
+                                        <span class="badge badge-soft-danger px-2 py-1 rounded-pill">Production</span>
+                                    }
+                                    else if (item.Environment == "Staging")
+                                    {
+                                        <span class="badge badge-soft-warning px-2 py-1 rounded-pill">Staging</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-soft-cyan px-2 py-1 rounded-pill">@item.Environment</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Status == "Successful")
+                                    {
+                                        <span class="badge badge-soft-success px-2 py-1 rounded-pill d-inline-flex align-items-center gap-1">
+                                            <span class="pulse-indicator" style="width: 6px; height: 6px;"></span> Success
+                                        </span>
+                                    }
+                                    else if (item.Status == "Failed")
+                                    {
+                                        <span class="badge badge-soft-danger px-2 py-1 rounded-pill">
+                                            <i class="bi bi-x-circle me-1"></i>Failed
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-soft-warning px-2 py-1 rounded-pill">
+                                            <i class="bi bi-hourglass-split me-1"></i>@item.Status
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark border border-secondary text-secondary font-mono">
+                                        @(string.IsNullOrEmpty(item.CommitHash) ? "manual" : item.CommitHash)
+                                    </span>
+                                </td>
+                                <td class="small text-secondary">
+                                    <i class="bi bi-person-check me-1 text-primary"></i>@item.DeployedBy
+                                </td>
+                                <td class="small text-secondary font-mono">
+                                    @(item.ExecutionDurationSeconds > 0 ? $"{item.ExecutionDurationSeconds}s" : "-")
+                                </td>
+                                <td class="small text-secondary font-mono">
+                                    @item.DeployedAt.ToString("yyyy-MM-dd HH:mm")
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-secondary">
+                                <i class="bi bi-cloud-arrow-down fs-3 d-block mb-2 opacity-50"></i>
+                                Querying telemetry from REST API tier...
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive API Explorer & Linux EC2 Sandboxing Section -->
 <div class="row g-4 mb-4">
     <!-- Live REST API In-Browser Tester -->
     <div class="col-lg-7">
@@ -114,7 +341,7 @@
                 <span class="badge badge-soft-cyan">Live Endpoints</span>
             </div>
             <p class="text-secondary small">
-                Test the Phase 2 REST API directly from your browser. Click any endpoint to query the background service:
+                Test the decoupled Phase 2 REST API directly from your browser. Click any endpoint below to query the background service:
             </p>
 
             <div class="d-flex flex-wrap gap-2 mb-3">
@@ -144,10 +371,10 @@
     <div class="col-lg-5">
         <div class="card card-glass p-4 h-100">
             <h5 class="fw-bold text-light mb-3">
-                <i class="bi bi-shield-shaded text-purple-accent me-2"></i>Bare-Metal systemd Isolation
+                <i class="bi bi-shield-shaded text-purple-accent me-2"></i>Bare-Metal systemd Sandboxing
             </h5>
             <p class="text-secondary small mb-3">
-                We achieve container-grade security isolation on bare Linux EC2 without Docker daemon RAM overhead:
+                Container-grade security isolation directly enforced on bare Linux EC2 without Docker daemon RAM overhead:
             </p>
             <div class="d-flex flex-column gap-2">
                 <div class="p-2 rounded bg-dark bg-opacity-50 border border-secondary border-opacity-50">

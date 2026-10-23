@@ -1,0 +1,25 @@
+# Git & Documentation
+.git
+.gitignore
+.vs
+.vscode
+Docs/
+*.md
+
+# Build Artifacts & Dependencies (Crucial: Let Docker compile fresh inside Linux)
+**/bin/
+**/obj/
+**/publish-web/
+**/publish-api/
+**/release-web/
+**/release-api/
+
+# Environment files & Secrets (Never bake secrets into images)
+**/.env
+**/.env.*
+!**/.env.example
+
+# Test results & logs
+**/TestResults/
+**/*.trx
+**/*.log

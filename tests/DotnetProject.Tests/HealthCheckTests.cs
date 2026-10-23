@@ -1,6 +1,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using DotnetProject.Web.Controllers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using DotnetProject.Api.Controllers;
+using DotnetProject.Core.Data;
 using Xunit;
 
 namespace DotnetProject.Tests
@@ -11,11 +14,16 @@ namespace DotnetProject.Tests
         public async Task HealthEndpoint_ReturnsOkOrStatus200_WithApiTierDiagnostics()
         {
             // Arrange
-            var fakeApiClient = new FakeDeploymentApiClient();
-            var controller = new HealthController(fakeApiClient);
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: "HealthTestDb")
+                .Options;
+            using var context = new ApplicationDbContext(options);
+
+            var configuration = new ConfigurationBuilder().Build();
+            var controller = new HealthController(context, configuration);
 
             // Act
-            var result = await controller.Get();
+            var result = await controller.GetHealth();
 
             // Assert
             Assert.NotNull(result);

@@ -1,0 +1,71 @@
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4 shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold d-flex align-items-center gap-2" routerLink="/dashboard">
+        <span class="d-inline-flex align-items-center justify-content-center p-2 rounded-3" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);">
+          <i class="bi bi-cloud-arrow-up-fill text-white fs-5"></i>
+        </span>
+        <div>
+          <span class="bg-gradient text-white">DevOps Tracker</span>
+          <span class="badge badge-soft-cyan ms-2 font-mono" style="font-size: 0.65rem;">NG-SPA</span>
+        </div>
+      </a>
+
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 gap-1">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+              <i class="bi bi-speedometer2 me-1 text-primary"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/deployments" routerLinkActive="active">
+              <i class="bi bi-stack me-1 text-info"></i> Releases
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/diagnostics" routerLinkActive="active">
+              <i class="bi bi-heart-pulse me-1 text-danger"></i> Diagnostics
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://localhost:5050/swagger" target="_blank" rel="noopener noreferrer">
+              <i class="bi bi-file-earmark-code me-1 text-warning"></i> Swagger API
+            </a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-3">
+          <!-- API Heartbeat Status -->
+          <div class="d-flex align-items-center gap-2 px-3 py-1.5 rounded-pill bg-dark border border-secondary shadow-sm" style="font-size: 0.82rem;">
+            @if (healthService.checking()) {
+              <span class="spinner-border spinner-border-sm text-secondary" style="width: 8px; height: 8px;"></span>
+              <span class="text-secondary small">Checking...</span>
+            } @else if (healthService.health()?.status === 'Healthy') {
+              <span class="pulse-indicator"></span>
+              <span class="text-light fw-medium">API 2.0 Online</span>
+              @if (healthService.health()?.responseTimeMs) {
+                <span class="badge badge-soft-success font-mono" style="font-size: 0.7rem;">{{ healthService.health()?.responseTimeMs }}ms</span>
+              }
+            } @else if (healthService.health()?.status === 'Degraded') {
+              <span class="pulse-indicator warning"></span>
+              <span class="text-warning fw-medium">API Degraded</span>
+            } @else {
+              <span class="pulse-indicator danger"></span>
+              <span class="text-danger fw-medium">API Offline</span>
+            }
+          </div>
+
+          <a routerLink="/deployments/new" class="btn btn-primary-gradient btn-sm px-3 py-2 rounded-pill d-inline-flex align-items-center gap-1.5 shadow-sm">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>New Release</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>

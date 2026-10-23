@@ -1,0 +1,204 @@
+<div class="row justify-content-center">
+  <div class="col-lg-9 col-xl-8">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <a routerLink="/deployments" class="btn btn-glass btn-sm mb-2">
+          <i class="bi bi-arrow-left me-1"></i> Back to Releases
+        </a>
+        <h2 class="fw-bold text-white mb-1">
+          @if (isEditMode()) {
+            <i class="bi bi-pencil-square text-warning me-2"></i>Edit Release Record
+          } @else {
+            <i class="bi bi-plus-circle-fill text-primary me-2"></i>Publish New Deployment
+          }
+        </h2>
+        <p class="text-secondary small mb-0">
+          Telemetry will be dispatched to the Kestrel REST API tier and persisted in MySQL.
+        </p>
+      </div>
+      <span class="badge badge-soft-cyan font-mono d-none d-sm-inline-block">
+        {{ isEditMode() ? 'MODE: UPDATE' : 'MODE: CREATE' }}
+      </span>
+    </div>
+
+    <!-- Success / Error Feedback -->
+    @if (successMessage()) {
+      <div class="alert alert-success d-flex align-items-center gap-2 mb-4 bg-opacity-25 border-success text-success shadow-sm">
+        <i class="bi bi-check-circle-fill fs-5"></i>
+        <span>{{ successMessage() }}</span>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="alert alert-danger d-flex align-items-center gap-2 mb-4 bg-opacity-25 border-danger text-danger shadow-sm">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <!-- Form Card -->
+    <div class="card-glass p-4 p-md-5">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="row g-4">
+          <!-- Associated Project -->
+          <div class="col-md-6">
+            <label class="form-label text-light fw-medium small">
+              Associated Service / Project <span class="text-secondary">(Optional)</span>
+            </label>
+            <select
+              formControlName="projectId"
+              class="form-select form-select-glass"
+              (change)="onProjectSelected($event)"
+            >
+              <option [ngValue]="null">-- Standalone Microservice / None --</option>
+              @for (proj of projectService.projects(); track proj.id) {
+                <option [value]="proj.id">{{ proj.name }} ({{ proj.techStack }})</option>
+              }
+            </select>
+            <div class="form-text text-secondary small">Links deployment to registered platform catalog.</div>
+          </div>
+
+          <!-- Application Name -->
+          <div class="col-md-6">
+            <label class="form-label text-light fw-medium small">
+              Application Name <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="appName"
+              class="form-control form-control-glass"
+              placeholder="e.g., Payment Gateway Service"
+              [class.is-invalid]="form.get('appName')?.invalid && form.get('appName')?.touched"
+            />
+            @if (form.get('appName')?.invalid && form.get('appName')?.touched) {
+              <div class="text-danger small mt-1">Application name is required (max 100 characters).</div>
+            }
+          </div>
+
+          <!-- Version & Environment -->
+          <div class="col-md-6">
+            <label class="form-label text-light fw-medium small">
+              Release Version <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-secondary text-secondary font-mono">tag</span>
+              <input
+                type="text"
+                formControlName="version"
+                class="form-control form-control-glass font-mono"
+                placeholder="v2.4.0"
+                [class.is-invalid]="form.get('version')?.invalid && form.get('version')?.touched"
+              />
+            </div>
+            @if (form.get('version')?.invalid && form.get('version')?.touched) {
+              <div class="text-danger small mt-1">Release version is required (e.g. v1.0.0).</div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-light fw-medium small">
+              Target Environment <span class="text-danger">*</span>
+            </label>
+            <select formControlName="environment" class="form-select form-select-glass font-mono">
+              <option value="Production">Production (Live Host)</option>
+              <option value="Staging">Staging (Pre-Release)</option>
+              <option value="Development">Development (CI Sandbox)</option>
+            </select>
+          </div>
+
+          <!-- Status & Execution Duration -->
+          <div class="col-md-6">
+            <label class="form-label text-light fw-medium small">
+              Deployment Status <span class="text-danger">*</span>
+            </label>
+            <select formControlName="status" class="form-select form-select-glass font-mono">
+              <option value="Successful">Successful (Healthy)</option>
+              <option value="In-Progress">In-Progress (Executing)</option>
+              <option value="Failed">Failed (Build/Deploy Error)</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-light fw-medium small">
+              Execution Duration (Seconds) <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-secondary text-secondary">
+                <i class="bi bi-stopwatch"></i>
+              </span>
+              <input
+                type="number"
+                formControlName="executionDurationSeconds"
+                class="form-control form-control-glass font-mono"
+                min="1"
+                placeholder="45"
+              />
+            </div>
+          </div>
+
+          <!-- Deployed By & Commit Hash -->
+          <div class="col-md-6">
+            <label class="form-label text-light fw-medium small">
+              Deployed By / Trigger
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-secondary text-secondary">
+                <i class="bi bi-person"></i>
+              </span>
+              <input
+                type="text"
+                formControlName="deployedBy"
+                class="form-control form-control-glass"
+                placeholder="e.g. GitHub Actions or engineer name"
+              />
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-light fw-medium small">
+              Git Commit Hash (SHA)
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-secondary text-secondary font-mono">git#</span>
+              <input
+                type="text"
+                formControlName="commitHash"
+                class="form-control form-control-glass font-mono"
+                placeholder="e.g. a1b2c3d or HEAD"
+              />
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="col-12">
+            <label class="form-label text-light fw-medium small">
+              Release Notes & Pipeline Summary
+            </label>
+            <textarea
+              formControlName="notes"
+              rows="3"
+              class="form-control form-control-glass"
+              placeholder="Describe release scope, PR references, or deployment notes..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top border-secondary border-opacity-25">
+          <a routerLink="/deployments" class="btn btn-glass px-4">
+            Cancel
+          </a>
+          <button type="submit" class="btn btn-primary-gradient px-4" [disabled]="submitting()">
+            @if (submitting()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Saving...
+            } @else {
+              <i class="bi bi-cloud-arrow-up me-2"></i>
+              {{ isEditMode() ? 'Save Changes' : 'Publish Deployment' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

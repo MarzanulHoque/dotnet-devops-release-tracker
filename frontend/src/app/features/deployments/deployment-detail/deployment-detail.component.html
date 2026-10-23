@@ -1,0 +1,231 @@
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading telemetry record...</span>
+    </div>
+    <div class="text-secondary mt-2 small">Fetching execution logs and metadata from API...</div>
+  </div>
+} @else if (error() || !deployment()) {
+  <div class="card-glass p-5 text-center">
+    <i class="bi bi-exclamation-triangle-fill fs-1 text-danger"></i>
+    <h4 class="text-white mt-3">Deployment Record Not Found</h4>
+    <p class="text-secondary">{{ error() || 'The requested release record does not exist or has been removed.' }}</p>
+    <a routerLink="/deployments" class="btn btn-primary-gradient px-4 mt-2">
+      <i class="bi bi-arrow-left me-1"></i> Return to Releases
+    </a>
+  </div>
+} @else {
+  @let item = deployment()!;
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <a routerLink="/deployments" class="btn btn-glass btn-sm mb-2">
+        <i class="bi bi-arrow-left me-1"></i> Back to Releases
+      </a>
+      <div class="d-flex align-items-center gap-2">
+        <h2 class="fw-bold text-white mb-0">{{ item.appName }}</h2>
+        <span class="badge badge-soft-primary font-mono fs-6">{{ item.version }}</span>
+        <app-status-badge [status]="item.status"></app-status-badge>
+      </div>
+      <div class="text-secondary small mt-1">
+        Deployment Record <code class="text-cyan-accent">#{{ item.id }}</code> &bull;
+        @if (item.projectName) {
+          Project: <strong class="text-light">{{ item.projectName }}</strong> &bull;
+        }
+        Timestamp: <span class="font-mono text-light">{{ item.deployedAt | date:'medium' }}</span>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a [routerLink]="['/deployments', item.id, 'edit']" class="btn btn-glass px-3">
+        <i class="bi bi-pencil me-1 text-warning"></i> Edit Record
+      </a>
+      <button (click)="confirmDelete()" class="btn btn-glass px-3 text-danger">
+        <i class="bi bi-trash me-1"></i> Delete
+      </button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Telemetry Summary Cards -->
+    <div class="col-lg-4">
+      <div class="card-glass p-4 mb-4">
+        <h6 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+          <i class="bi bi-cpu text-info"></i> Pipeline Telemetry
+        </h6>
+
+        <div class="d-flex flex-column gap-3">
+          <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
+            <span class="text-secondary small">Environment</span>
+            @if (item.environment.toLowerCase() === 'production') {
+              <span class="badge badge-soft-danger font-mono">{{ item.environment }}</span>
+            } @else if (item.environment.toLowerCase() === 'staging') {
+              <span class="badge badge-soft-warning font-mono">{{ item.environment }}</span>
+            } @else {
+              <span class="badge badge-soft-cyan font-mono">{{ item.environment }}</span>
+            }
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
+            <span class="text-secondary small">Execution Duration</span>
+            <span class="font-mono text-white fw-medium">{{ item.executionDurationSeconds }} seconds</span>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
+            <span class="text-secondary small">Commit SHA</span>
+            <code class="text-cyan-accent font-mono">{{ item.commitHash }}</code>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
+            <span class="text-secondary small">Deployed By</span>
+            <span class="text-light small"><i class="bi bi-person text-secondary me-1"></i>{{ item.deployedBy }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-secondary small">Logs Ingested</span>
+            <span class="badge badge-soft-cyan font-mono">{{ item.logs.length }} Steps</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Release Notes -->
+      <div class="card-glass p-4 mb-4">
+        <h6 class="fw-bold text-white mb-2 d-flex align-items-center gap-2">
+          <i class="bi bi-journal-text text-warning"></i> Release Notes
+        </h6>
+        @if (item.notes) {
+          <p class="text-light small mb-0" style="white-space: pre-wrap;">{{ item.notes }}</p>
+        } @else {
+          <p class="text-secondary small fst-italic mb-0">No release notes provided for this deployment.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Execution Logs Terminal & Log Ingestion -->
+    <div class="col-lg-8">
+      <div class="card-glass p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+            <i class="bi bi-terminal text-success"></i> Pipeline Execution Audit Logs
+          </h5>
+          <span class="badge badge-soft-primary font-mono">{{ item.logs.length }} Events</span>
+        </div>
+
+        @if (item.logs.length === 0) {
+          <div class="text-center py-4 bg-dark bg-opacity-50 rounded-3 border border-secondary border-opacity-25">
+            <i class="bi bi-journal-x fs-2 text-secondary opacity-50"></i>
+            <p class="text-secondary small mt-2 mb-0">No execution logs attached to this release.</p>
+          </div>
+        } @else {
+          <div class="console-output">
+            @for (log of item.logs; track log.id) {
+              <div class="mb-2 pb-2 border-bottom border-secondary border-opacity-25">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                  <span class="text-secondary" style="font-size: 0.75rem;">{{ log.timestamp | date:'HH:mm:ss' }}</span>
+                  <span class="fw-bold text-white">[{{ log.stepName }}]</span>
+                  @if (log.logLevel.toLowerCase() === 'error') {
+                    <span class="badge badge-soft-danger px-1.5 py-0 font-mono" style="font-size: 0.65rem;">ERROR</span>
+                  } @else if (log.logLevel.toLowerCase() === 'warning') {
+                    <span class="badge badge-soft-warning px-1.5 py-0 font-mono" style="font-size: 0.65rem;">WARN</span>
+                  } @else {
+                    <span class="badge badge-soft-cyan px-1.5 py-0 font-mono" style="font-size: 0.65rem;">INFO</span>
+                  }
+                </div>
+                <div class="text-light" style="font-size: 0.82rem; padding-left: 0.5rem; border-left: 2px solid rgba(6, 182, 212, 0.4);">
+                  {{ log.message }}
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Append Log Quick Tool -->
+        <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+          <h6 class="text-white small fw-bold mb-2 d-flex align-items-center gap-2">
+            <i class="bi bi-plus-circle text-primary"></i> Append Pipeline Event
+          </h6>
+          <div class="row g-2">
+            <div class="col-sm-4">
+              <input
+                type="text"
+                class="form-control form-control-glass form-control-sm font-mono"
+                placeholder="Step Name (e.g. Smoke Test)"
+                [ngModel]="newStepName()"
+                (ngModelChange)="newStepName.set($event)"
+              />
+            </div>
+            <div class="col-sm-3">
+              <select
+                class="form-select form-select-glass form-select-sm font-mono"
+                [ngModel]="newLogLevel()"
+                (ngModelChange)="newLogLevel.set($event)"
+              >
+                <option value="Info">Info</option>
+                <option value="Warning">Warning</option>
+                <option value="Error">Error</option>
+              </select>
+            </div>
+            <div class="col-sm-5">
+              <div class="input-group input-group-sm">
+                <input
+                  type="text"
+                  class="form-control form-control-glass font-mono"
+                  placeholder="Event log message..."
+                  [ngModel]="newMessage()"
+                  (ngModelChange)="newMessage.set($event)"
+                  (keyup.enter)="appendLog()"
+                />
+                <button
+                  class="btn btn-primary-gradient px-3"
+                  (click)="appendLog()"
+                  [disabled]="!newMessage().trim() || addingLog()"
+                >
+                  @if (addingLog()) {
+                    <span class="spinner-border spinner-border-sm"></span>
+                  } @else {
+                    Log
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal()) {
+  <div class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3" style="position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px); z-index: 1050;">
+    <div class="card-glass p-4 shadow-lg border-danger" style="max-width: 480px; width: 100%;">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <span class="badge badge-soft-danger p-3 rounded-circle">
+          <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        </span>
+        <div>
+          <h5 class="fw-bold text-white mb-0">Delete Release Record?</h5>
+          <span class="text-secondary small">This operation cannot be undone.</span>
+        </div>
+      </div>
+
+      <p class="text-light small mb-4">
+        Are you sure you want to permanently delete deployment
+        <strong class="text-white">{{ deployment()?.appName }}</strong> ({{ deployment()?.version }})?
+      </p>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-glass px-4" (click)="cancelDelete()" [disabled]="deleting()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger px-4" (click)="executeDelete()" [disabled]="deleting()">
+          @if (deleting()) {
+            <span class="spinner-border spinner-border-sm me-1"></span> Deleting...
+          } @else {
+            Delete Record
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

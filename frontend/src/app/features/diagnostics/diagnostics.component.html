@@ -1,0 +1,220 @@
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+      <i class="bi bi-heart-pulse text-danger"></i> System Diagnostics & API Telemetry
+    </h2>
+    <p class="text-secondary mb-0 small">
+      Real-time health verification probing the decoupled ASP.NET Core REST API microservice and MySQL persistence tier.
+    </p>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    @if (healthService.lastChecked()) {
+      <span class="text-secondary small font-mono d-none d-sm-inline-block">
+        Last probed: {{ healthService.lastChecked() | date:'HH:mm:ss' }}
+      </span>
+    }
+    <button (click)="refreshProbe()" class="btn btn-primary-gradient px-4" [disabled]="healthService.checking()">
+      @if (healthService.checking()) {
+        <span class="spinner-border spinner-border-sm me-1"></span> Probing...
+      } @else {
+        <i class="bi bi-arrow-repeat me-1"></i> Probe Health
+      }
+    </button>
+  </div>
+</div>
+
+@let h = healthService.health();
+
+<!-- Health Overview Grid -->
+<div class="row g-4 mb-4">
+  <!-- API Status Node -->
+  <div class="col-md-6 col-xl-4">
+    <div class="card-glass p-4 h-100">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge badge-soft-primary p-2.5 rounded-3">
+            <i class="bi bi-braces fs-4"></i>
+          </span>
+          <div>
+            <h6 class="fw-bold text-white mb-0">REST API Tier</h6>
+            <span class="text-secondary small font-mono">DotnetProject.Api</span>
+          </div>
+        </div>
+        @if (h?.status === 'Healthy') {
+          <span class="badge badge-soft-success font-mono">HEALTHY</span>
+        } @else if (h?.status === 'Degraded') {
+          <span class="badge badge-soft-warning font-mono">DEGRADED</span>
+        } @else {
+          <span class="badge badge-soft-danger font-mono">OFFLINE</span>
+        }
+      </div>
+
+      <div class="d-flex flex-column gap-2 text-secondary small">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+          <span>Latency</span>
+          <span class="text-cyan-accent font-mono fw-bold">
+            {{ h?.responseTimeMs !== undefined ? h?.responseTimeMs + ' ms' : 'N/A' }}
+          </span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+          <span>Uptime</span>
+          <span class="text-light font-mono">{{ h?.uptime || 'N/A' }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+          <span>Environment</span>
+          <span class="text-light font-mono">{{ h?.environment || 'N/A' }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1">
+          <span>Service Version</span>
+          <span class="text-light font-mono">{{ h?.version || 'N/A' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Database Persistence Node -->
+  <div class="col-md-6 col-xl-4">
+    <div class="card-glass p-4 h-100">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge badge-soft-warning p-2.5 rounded-3">
+            <i class="bi bi-database fs-4"></i>
+          </span>
+          <div>
+            <h6 class="fw-bold text-white mb-0">Persistence Tier</h6>
+            <span class="text-secondary small font-mono">Relational Storage</span>
+          </div>
+        </div>
+        @if (h?.database?.connected) {
+          <span class="badge badge-soft-success font-mono">CONNECTED</span>
+        } @else {
+          <span class="badge badge-soft-danger font-mono">DISCONNECTED</span>
+        }
+      </div>
+
+      <div class="d-flex flex-column gap-2 text-secondary small">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+          <span>Provider</span>
+          <span class="text-warning font-mono fw-bold">{{ h?.database?.provider || 'Unknown' }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+          <span>Connection Status</span>
+          <span class="text-light font-mono">{{ h?.database?.message || 'Probing...' }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+          <span>Host Machine</span>
+          <span class="text-light font-mono">{{ h?.hostname || 'N/A' }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1">
+          <span>Relational Migrations</span>
+          <span class="text-success font-mono">Synced</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frontend UI Node -->
+  <div class="col-md-12 col-xl-4">
+    <div class="card-glass p-4 h-100">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge badge-soft-cyan p-2.5 rounded-3">
+            <i class="bi bi-browser-chrome fs-4"></i>
+          </span>
+          <div>
+            <h6 class="fw-bold text-white mb-0">Presentation Tier</h6>
+            <span class="text-secondary small font-mono">Angular Standalone</span>
+          </div>
+        </div>
+        <span class="badge badge-soft-cyan font-mono">ACTIVE</span>
+      </div>
+
+      <div class="d-flex flex-column gap-2 text-secondary small">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+          <span>Framework</span>
+          <span class="text-white font-mono fw-bold">Angular 20.3</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+          <span>State Model</span>
+          <span class="text-light font-mono">Signals & Computed</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+          <span>Styling Layer</span>
+          <span class="text-light font-mono">Bootstrap 5.3 + Glassmorphism</span>
+        </div>
+        <div class="d-flex justify-content-between py-1">
+          <span>Containerization</span>
+          <span class="text-light font-mono">Docker Nginx Ready</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API Endpoints Directory & Raw Telemetry Output -->
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card-glass p-4 h-100">
+      <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+        <i class="bi bi-hdd-network text-info"></i> API Endpoints Catalog
+      </h5>
+      <p class="text-secondary small mb-3">
+        The REST API exposes OpenAPI documentation and standard endpoints accessible to microservices, CI/CD runners, and the Angular SPA.
+      </p>
+
+      <div class="d-flex flex-column gap-2">
+        <a href="http://localhost:5050/swagger" target="_blank" rel="noopener noreferrer" class="btn btn-glass d-flex justify-content-between align-items-center p-2.5 text-start">
+          <div>
+            <div class="fw-semibold text-white small"><i class="bi bi-file-earmark-code me-2 text-warning"></i>Swagger OpenAPI Interactive Docs</div>
+            <div class="text-secondary font-mono" style="font-size: 0.72rem;">http://localhost:5050/swagger</div>
+          </div>
+          <i class="bi bi-box-arrow-up-right text-secondary"></i>
+        </a>
+
+        <a href="http://localhost:5050/api/health" target="_blank" rel="noopener noreferrer" class="btn btn-glass d-flex justify-content-between align-items-center p-2.5 text-start">
+          <div>
+            <div class="fw-semibold text-white small"><i class="bi bi-heart-pulse me-2 text-danger"></i>API Diagnostics Probe</div>
+            <div class="text-secondary font-mono" style="font-size: 0.72rem;">GET /api/health</div>
+          </div>
+          <i class="bi bi-box-arrow-up-right text-secondary"></i>
+        </a>
+
+        <a href="http://localhost:5050/api/deployments" target="_blank" rel="noopener noreferrer" class="btn btn-glass d-flex justify-content-between align-items-center p-2.5 text-start">
+          <div>
+            <div class="fw-semibold text-white small"><i class="bi bi-stack me-2 text-primary"></i>Deployments Collection</div>
+            <div class="text-secondary font-mono" style="font-size: 0.72rem;">GET /api/deployments</div>
+          </div>
+          <i class="bi bi-box-arrow-up-right text-secondary"></i>
+        </a>
+
+        <a href="http://localhost:5050/api/projects" target="_blank" rel="noopener noreferrer" class="btn btn-glass d-flex justify-content-between align-items-center p-2.5 text-start">
+          <div>
+            <div class="fw-semibold text-white small"><i class="bi bi-boxes me-2 text-info"></i>Registered Projects</div>
+            <div class="text-secondary font-mono" style="font-size: 0.72rem;">GET /api/projects</div>
+          </div>
+          <i class="bi bi-box-arrow-up-right text-secondary"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card-glass p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+          <i class="bi bi-code-square text-cyan-accent"></i> Live Telemetry JSON Payload
+        </h5>
+        <span class="badge badge-soft-cyan font-mono">application/json</span>
+      </div>
+
+      <div class="console-output" style="max-height: 320px;">
+        @if (h) {
+          <pre class="mb-0 text-cyan-accent" style="font-size: 0.82rem;">{{ h | json }}</pre>
+        } @else {
+          <span class="text-secondary small">No telemetry payload available. Click "Probe Health" to query the REST API.</span>
+        }
+      </div>
+    </div>
+  </div>
+</div>

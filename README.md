@@ -1,54 +1,53 @@
-# 🚀 DevOps Deployment Tracker — True 3-Tier Architecture on AWS EC2
+# 🚀 DevOps Deployment Tracker — Decoupled Angular SPA & REST API Architecture
 
 [![CI/CD Build & Test](https://github.com/marzanulhoque/dotnet-devops-release-tracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/marzanulhoque/dotnet-devops-release-tracker/actions)
-[![Architecture](https://img.shields.io/badge/Architecture-True%203--Tier%20Decoupled-blueviolet)](#-true-3-tier-architecture)
+[![Architecture](https://img.shields.io/badge/Architecture-Angular%20SPA%20%2B%20REST%20API-blueviolet)](#-phase-3-decoupled-spa-architecture)
 [![Swagger OpenAPI](https://img.shields.io/badge/API%20Docs-Swagger%20OpenAPI-success?logo=swagger)](#-key-features)
+![Angular](https://img.shields.io/badge/Angular-20%20Standalone-DD0031?logo=angular)
 ![.NET 8.0](https://img.shields.io/badge/.NET-8.0%20LTS-512BD4?logo=dotnet)
 ![AWS EC2](https://img.shields.io/badge/AWS-EC2%20Linux-FF9900?logo=amazonec2)
 ![MySQL](https://img.shields.io/badge/Database-MySQL%208.0-4479A1?logo=mysql)
 ![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions)
-![systemd](https://img.shields.io/badge/Daemon-systemd%20sandboxed-black?logo=linux)
 
-> 💡 **Cloud Cost Optimization Notice:** The AWS EC2 demonstration instance was stopped after milestone validation to eliminate idle cloud costs. The full 3-tier decoupled ecosystem can be deployed on-demand via our automated CI/CD pipeline or run locally using the instructions below.
+> 💡 **Cloud Cost Optimization Notice:** The AWS EC2 demonstration instance was stopped after milestone validation to eliminate idle cloud costs. The full decoupled ecosystem can be deployed on-demand via our automated CI/CD pipeline or run locally using the instructions below.
 > 
-> ⚙️ **Production Stack:** AWS EC2 Linux (Ubuntu 24.04 LTS) • Nginx Reverse Proxy (:80) • Dual systemd Daemons with Container-Grade Sandboxing (`DynamicUser=yes`, `ProtectSystem=strict`) • MySQL 8.0 with EF Core Code-First Migrations
+> ⚙️ **Phase 3 Stack:** Angular 20 Standalone SPA (:4200) • ASP.NET Core 8.0 REST API Microservice (:5050) • Pomelo MySQL 8.0 Relational Persistence • Nginx / Docker Container Ready
 
 ---
 
-## 🏛️ True 3-Tier Architecture
+## 🏛️ Phase 3 Decoupled SPA Architecture
 
-In **Phase 2**, we evolved our monolithic MVC application into a **True 3-Tier Decoupled Architecture**:
+In **Phase 3**, the legacy monolithic MVC layer has been converted into an enterprise-grade **Angular 20 Single-Page Application (SPA)**:
 
 ```
-[ Browser / Public Client ]
-             │
-             ▼ (Public Port 80)
-      [ Nginx Reverse Proxy ]
-             ├── location / ─────────────────► [ MVC Presentation Tier (:5000) ]
-             │                                              │
-             │                                              │ (Internal HTTP via IDeploymentApiClient)
-             ▼                                              ▼
-   [ External CI/CD Webhooks ] ──────► [ REST API Business Tier (:5050) ] ◄─── [ Swagger OpenAPI ]
-                                                            │
-                                                            │ (Entity Framework Core Pomelo)
-                                                            ▼
-                                                [ MySQL 8.0 Database Tier ]
+[ Browser / Single-Page Application ]
+                 │
+                 ▼ (Port 4200 in Dev / Port 80 via Reverse Proxy)
+     [ Angular 20 Standalone SPA ]
+                 │
+                 │ (HTTP / JSON over CORS with Angular Signals)
+                 ▼
+   [ REST API Microservice Tier (:5050) ] ◄─── [ External CI/CD Webhooks ]
+                 │                                        ▲
+                 │ (Entity Framework Core Pomelo)         │
+                 ▼                              [ Swagger OpenAPI Docs ]
+     [ MySQL 8.0 Database Tier ]
 ```
 
 ### Architectural Principles:
-1. **Pure Presentation Tier (`DotnetProject.Web` / MVC)**:
-   - Contains **zero database dependencies, zero MySQL drivers, and zero database connection strings**.
-   - Connects to the business tier exclusively over HTTP via a strongly-typed `IDeploymentApiClient`.
-   - Features a modern **glassmorphic dark-mode UI**, real-time architecture telemetry, and an **interactive in-browser REST API explorer**.
-2. **Business / Services Tier (`DotnetProject.Api`)**:
-   - Dedicated RESTful Web API listening internally on port `5050`.
+1. **Modern Frontend SPA (`frontend/`)**:
+   - Built with **Angular 20 Standalone Components**, eliminating legacy NgModules.
+   - Reactive state management powered by **Angular Signals** (`signal`, `computed`) for live telemetry computation.
+   - Modern dark glassmorphic design system using **Bootstrap 5.3 + Bootstrap Icons**.
+   - Dynamic real-time API health heartbeat indicator and telemetry data table with client-side filtering, sorting, and pagination.
+2. **Autonomous Business / REST API Tier (`DotnetProject.Api`)**:
+   - Autonomous RESTful Web API listening on port `5050` with open CORS for the SPA.
    - Implements full release CRUD operations, query filtering, and real-time system diagnostics (`/api/health`).
    - Hosts interactive OpenAPI documentation at `/swagger`.
-   - Exposes `POST /api/deployments/webhook` to ingest automated deployment telemetry directly from CI/CD pipelines (GitHub Actions, GitLab CI, Jenkins).
+   - Ingests automated deployment events directly from CI/CD pipelines via `POST /api/deployments/webhook`.
 3. **Domain & Data Access Tier (`DotnetProject.Core`)**:
-   - Centralized relational domain: `Projects`, `Deployments`, and `DeploymentLogs` with foreign key relationships and cascade rules.
-   - Code-First EF Core migrations with `ApplicationDbContextFactory` for design-time scaffolding.
-   - Automatic startup migrations via `context.Database.Migrate()`.
+   - Centralized relational domain: `Projects`, `Deployments`, and `DeploymentLogs`.
+   - Code-First EF Core migrations with automatic startup synchronization via `context.Database.Migrate()`.
 
 ---
 
@@ -106,50 +105,23 @@ In **Phase 2**, we evolved our monolithic MVC application into a **True 3-Tier D
 │   │   ├── HealthController.cs          # API diagnostics & database probe
 │   │   └── ProjectsController.cs        # Registered applications catalog
 │   └── Program.cs                       # Swagger, CORS, and automatic DB migration
-├── MVC/                                 # Tier 1: Pure Presentation Portal (:5000)
-│   ├── Controllers/
-│   │   ├── DeploymentsController.cs     # Delegates all actions to IDeploymentApiClient
-│   │   ├── HealthController.cs          # Probes downstream API tier health
-│   │   └── HomeController.cs            # Overview & system topology
-│   ├── Services/
-│   │   ├── IDeploymentApiClient.cs      # Contract for REST API consumption
-│   │   └── DeploymentApiClient.cs       # Typed HttpClient implementation
-│   ├── Views/                           # Modern Glassmorphic Razor views
-│   │   ├── Home/Index.cshtml            # Dashboard with interactive in-browser API explorer
-│   │   └── Deployments/Index.cshtml     # Releases table with CI webhook cURL generator
-│   └── Program.cs                       # Configures AddHttpClient<IDeploymentApiClient>()
-├── tests/DotnetProject.Tests/           # xUnit Test Suite (16/16 Passed)
+├── frontend/                            # Tier 1: Modern Angular 20 Standalone SPA (:4200)
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── core/                    # Models (Deployment, Project, Health) & Signals Services
+│   │   │   ├── shared/                  # Navbar with Heartbeat, Footer, StatusBadge
+│   │   │   └── features/                # Dashboard, Deployments CRUD & Diagnostics views
+│   │   ├── environments/                # Environment configurations (API Base URL)
+│   │   └── styles.css                   # Bootstrap 5.3 + Glassmorphic Telemetry Theme
+│   └── angular.json                     # Standalone application build configuration
+├── tests/DotnetProject.Tests/           # xUnit Test Suite (12/12 Passed)
 │   ├── DeploymentsApiControllerTests.cs # Integration tests for REST API endpoints
-│   ├── DeploymentsControllerTests.cs    # Unit tests for MVC controller with FakeApiClient
+│   ├── DeploymentRecordModelTests.cs    # Domain model validation tests
 │   └── HealthCheckTests.cs              # Health diagnostics verification
 └── deploy/                              # Infrastructure as Code (IaC)
     ├── api.service                      # systemd unit for DotnetProject.Api (:5050)
-    ├── app.service                      # systemd unit for DotnetProject.Web (:5000)
     ├── nginx.conf                       # Reverse proxy path-routing configuration
     └── setup-ec2.sh                     # Idempotent EC2 bootstrap script
-```
-
----
-
-## 🌐 Nginx Reverse Proxy Configuration
-
-Nginx on port 80 routes incoming requests based on path:
-
-```nginx
-# 1. MVC Frontend Dashboard (Port 5000)
-location / {
-    proxy_pass http://127.0.0.1:5000;
-}
-
-# 2. REST Web API Endpoints (Port 5050)
-location /api {
-    proxy_pass http://127.0.0.1:5050;
-}
-
-# 3. Interactive Swagger OpenAPI Docs (Port 5050)
-location /swagger {
-    proxy_pass http://127.0.0.1:5050;
-}
 ```
 
 ---
@@ -158,6 +130,7 @@ location /swagger {
 
 ### Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Node.js 20+ / npm](https://nodejs.org/)
 - Git
 
 ### 1. Build & Run Automated Tests
@@ -166,25 +139,29 @@ location /swagger {
 git clone https://github.com/marzanulhoque/dotnet-devops-release-tracker.git
 cd dotnet-devops-release-tracker
 
-# Build and execute all 16 test gates
-dotnet build DotnetProject.sln
-dotnet test DotnetProject.sln --configuration Release
+# Run .NET backend and integration tests
+dotnet test --nologo
+
+# Run Angular frontend build
+cd frontend
+npm install
+npm run build
+cd ..
 ```
 
-### 2. Launch Services
+### 2. Launch Services Locally
 ```bash
-# Terminal 1: Launch REST API (:5050)
-cd DotnetProject.Api
-dotnet run
+# Terminal 1: Launch ASP.NET Core REST API (:5050)
+dotnet run --project DotnetProject.Api
 
-# Terminal 2: Launch MVC Web Dashboard (:5000)
-cd MVC
-dotnet run
+# Terminal 2: Launch Angular Standalone SPA (:4200)
+cd frontend
+npm start
 ```
 
-- **Web Dashboard:** `http://localhost:5000/`
+- **Angular UI Dashboard:** `http://localhost:4200/`
 - **Swagger Documentation:** `http://localhost:5050/swagger`
-- **API Diagnostics:** `http://localhost:5050/api/health`
+- **API Health Diagnostics:** `http://localhost:5050/api/health`
 
 ---
 
@@ -192,12 +169,14 @@ dotnet run
 
 - [x] **Phase 1: ASP.NET Core 8.0 MVC Monolith (Completed)**
   - Single process MVC application, Razor dashboard, xUnit test gates, and GitHub Actions CI/CD to AWS EC2.
-- [x] **Phase 2: True 3-Tier Architecture & Relational Domain (Current Branch)**
-  - Presentation Tier decoupled from DB via `IDeploymentApiClient`.
-  - Dedicated REST Web API with Swagger, CI/CD webhook ingestion, and Pomelo MySQL EF Core migrations.
+- [x] **Phase 2: True 3-Tier Architecture & Relational Domain (Completed)**
+  - Dedicated REST Web API (`DotnetProject.Api`) with Swagger, CI/CD webhook ingestion, and Pomelo MySQL EF Core migrations.
   - Dual systemd daemons with container-grade sandboxing (`DynamicUser=yes`, `ProtectSystem=strict`).
-- [ ] **Phase 3: Dedicated Data Access Layer (DAL) & Clean Architecture (Upcoming)**
-  - Extraction into `DotnetProject.Data` with Repository & Unit of Work patterns.
+- [x] **Phase 3: Decoupled Angular Standalone SPA (`feat/phase3-angular-frontend`)**
+  - Converted UI into Angular 20 Standalone SPA (`frontend/`) using Angular Signals and Bootstrap 5.3 telemetry theme.
+  - Full CRUD operations, live API heartbeat probe, and deprecation of legacy MVC project.
+- [ ] **Phase 4: Docker Containerization (`feat/phase3-docker-containerization` - Upcoming)**
+  - Containerize the decoupled frontend and REST API using multi-stage Dockerfiles and compose orchestration.
 
 ---
 

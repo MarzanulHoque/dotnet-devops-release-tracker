@@ -1,0 +1,261 @@
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+      <i class="bi bi-stack text-primary"></i> Release Records & Pipeline Telemetry
+    </h2>
+    <p class="text-secondary mb-0 small">
+      Complete immutable deployment audit log consumed directly from the decoupled Kestrel REST API.
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <button (click)="refresh()" class="btn btn-glass px-3" [disabled]="deploymentService.loading()">
+      <i class="bi bi-arrow-clockwise me-1" [class.spin-icon]="deploymentService.loading()"></i> Refresh
+    </button>
+    <a routerLink="/deployments/new" class="btn btn-primary-gradient px-4">
+      <i class="bi bi-plus-circle me-1"></i> New Release
+    </a>
+  </div>
+</div>
+
+<!-- Filter Toolbar -->
+<div class="card-glass p-3 mb-4">
+  <div class="row g-3 align-items-center">
+    <!-- Search Input -->
+    <div class="col-lg-4">
+      <div class="input-group">
+        <span class="input-group-text bg-dark border-secondary text-secondary">
+          <i class="bi bi-search"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control form-control-glass"
+          placeholder="Filter by App, Version, Hash, Author..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+        @if (searchTerm()) {
+          <button (click)="onSearchChange('')" class="btn btn-dark border-secondary text-secondary">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Environment Filter -->
+    <div class="col-sm-6 col-lg-4">
+      <div class="d-flex flex-wrap gap-1">
+        @for (env of ['All', 'Production', 'Staging', 'Development']; track env) {
+          <button
+            type="button"
+            class="btn btn-sm"
+            [class.btn-primary-gradient]="selectedEnvironment() === env"
+            [class.btn-glass]="selectedEnvironment() !== env"
+            (click)="setEnvironmentFilter(env)"
+          >
+            {{ env }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="col-sm-6 col-lg-4">
+      <div class="d-flex flex-wrap gap-1 justify-content-lg-end">
+        @for (st of ['All', 'Successful', 'Failed', 'In-Progress']; track st) {
+          <button
+            type="button"
+            class="btn btn-sm"
+            [class.btn-primary-gradient]="selectedStatus() === st"
+            [class.btn-glass]="selectedStatus() !== st"
+            (click)="setStatusFilter(st)"
+          >
+            {{ st }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table Container -->
+<div class="card-glass p-0 mb-4 overflow-hidden">
+  @if (deploymentService.loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading releases...</span>
+      </div>
+      <div class="text-secondary mt-2 small">Streaming deployments from API...</div>
+    </div>
+  } @else if (filteredDeployments().length === 0) {
+    <div class="text-center py-5">
+      <i class="bi bi-filter-circle fs-1 text-secondary opacity-50"></i>
+      <h5 class="text-white mt-3">No matching deployment records found</h5>
+      <p class="text-secondary small mb-3">Try adjusting your search criteria or target environment filters.</p>
+      @if (searchTerm() || selectedEnvironment() !== 'All' || selectedStatus() !== 'All') {
+        <button (click)="onSearchChange(''); setEnvironmentFilter('All'); setStatusFilter('All')" class="btn btn-glass btn-sm">
+          Reset All Filters
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-custom align-middle">
+        <thead>
+          <tr>
+            <th>Application / Project</th>
+            <th (click)="toggleSort('version')" style="cursor: pointer;" class="user-select-none">
+              Version
+              @if (sortBy() === 'version') {
+                <i class="bi" [class.bi-caret-up-fill]="sortAsc()" [class.bi-caret-down-fill]="!sortAsc()"></i>
+              }
+            </th>
+            <th>Environment</th>
+            <th>Status</th>
+            <th (click)="toggleSort('executionDurationSeconds')" style="cursor: pointer;" class="user-select-none">
+              Duration
+              @if (sortBy() === 'executionDurationSeconds') {
+                <i class="bi" [class.bi-caret-up-fill]="sortAsc()" [class.bi-caret-down-fill]="!sortAsc()"></i>
+              }
+            </th>
+            <th>Commit SHA</th>
+            <th>Author</th>
+            <th (click)="toggleSort('deployedAt')" style="cursor: pointer;" class="user-select-none">
+              Deployed At
+              @if (sortBy() === 'deployedAt') {
+                <i class="bi" [class.bi-caret-up-fill]="sortAsc()" [class.bi-caret-down-fill]="!sortAsc()"></i>
+              }
+            </th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedDeployments(); track item.id) {
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge badge-soft-cyan p-2 rounded-2">
+                    <i class="bi bi-box-seam"></i>
+                  </span>
+                  <div>
+                    <div class="fw-semibold text-white">{{ item.appName }}</div>
+                    @if (item.projectName) {
+                      <div class="text-secondary small font-mono" style="font-size: 0.72rem;">{{ item.projectName }}</div>
+                    }
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge badge-soft-primary font-mono">{{ item.version }}</span>
+              </td>
+              <td>
+                @if (item.environment.toLowerCase() === 'production') {
+                  <span class="badge badge-soft-danger font-mono">{{ item.environment }}</span>
+                } @else if (item.environment.toLowerCase() === 'staging') {
+                  <span class="badge badge-soft-warning font-mono">{{ item.environment }}</span>
+                } @else {
+                  <span class="badge badge-soft-cyan font-mono">{{ item.environment }}</span>
+                }
+              </td>
+              <td>
+                <app-status-badge [status]="item.status"></app-status-badge>
+              </td>
+              <td>
+                <span class="font-mono text-light small"><i class="bi bi-stopwatch text-secondary me-1"></i>{{ item.executionDurationSeconds }}s</span>
+              </td>
+              <td>
+                <code class="text-cyan-accent small">{{ item.commitHash.substring(0, 7) }}</code>
+              </td>
+              <td>
+                <span class="text-light small"><i class="bi bi-person me-1 text-secondary"></i>{{ item.deployedBy }}</span>
+              </td>
+              <td>
+                <span class="text-secondary small font-mono">{{ item.deployedAt | date:'MMM d, y HH:mm' }}</span>
+              </td>
+              <td class="text-end">
+                <div class="d-inline-flex gap-1">
+                  <a [routerLink]="['/deployments', item.id]" class="btn btn-glass btn-sm px-2.5 py-1" title="Inspect Telemetry">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a [routerLink]="['/deployments', item.id, 'edit']" class="btn btn-glass btn-sm px-2.5 py-1 text-warning" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button (click)="confirmDelete(item)" class="btn btn-glass btn-sm px-2.5 py-1 text-danger" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center p-3 border-top border-secondary border-opacity-25">
+      <div class="text-secondary small">
+        Showing <span class="text-white fw-semibold">{{ (currentPage() - 1) * pageSize() + 1 }}</span>
+        to <span class="text-white fw-semibold">{{ Math.min(currentPage() * pageSize(), filteredDeployments().length) }}</span>
+        of <span class="text-white fw-semibold">{{ filteredDeployments().length }}</span> records
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <button
+          class="btn btn-glass btn-sm px-3"
+          [disabled]="currentPage() === 1"
+          (click)="setPage(currentPage() - 1)"
+        >
+          <i class="bi bi-chevron-left me-1"></i> Prev
+        </button>
+
+        <span class="font-mono text-secondary small px-2">
+          Page <span class="text-white">{{ currentPage() }}</span> of <span class="text-white">{{ totalPages() }}</span>
+        </span>
+
+        <button
+          class="btn btn-glass btn-sm px-3"
+          [disabled]="currentPage() >= totalPages()"
+          (click)="setPage(currentPage() + 1)"
+        >
+          Next <i class="bi bi-chevron-right ms-1"></i>
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Delete Confirmation Modal (Native Glass Overlay) -->
+@if (pendingDelete()) {
+  <div class="modal-backdrop-custom d-flex align-items-center justify-content-center p-3" style="position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px); z-index: 1050;">
+    <div class="card-glass p-4 shadow-lg border-danger" style="max-width: 480px; width: 100%;">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <span class="badge badge-soft-danger p-3 rounded-circle">
+          <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        </span>
+        <div>
+          <h5 class="fw-bold text-white mb-0">Confirm Deletion</h5>
+          <span class="text-secondary small">This operation cannot be undone.</span>
+        </div>
+      </div>
+
+      <p class="text-light small mb-4">
+        Are you sure you want to delete the deployment record for
+        <strong class="text-white">{{ pendingDelete()?.appName }}</strong> (version <code class="text-cyan-accent">{{ pendingDelete()?.version }}</code>)?
+        All related execution logs will also be permanently purged from the database.
+      </p>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-glass px-4" (click)="cancelDelete()" [disabled]="deleting()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger px-4" (click)="executeDelete()" [disabled]="deleting()">
+          @if (deleting()) {
+            <span class="spinner-border spinner-border-sm me-1"></span> Deleting...
+          } @else {
+            <i class="bi bi-trash me-1"></i> Delete Record
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

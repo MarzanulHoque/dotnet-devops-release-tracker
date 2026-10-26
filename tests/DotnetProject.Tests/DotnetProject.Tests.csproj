@@ -25,7 +25,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\DotnetProject.Core\DotnetProject.Core.csproj" />
     <ProjectReference Include="..\..\DotnetProject.Api\DotnetProject.Api.csproj" />
-    <ProjectReference Include="..\..\MVC\DotnetProject.Web.csproj" />
   </ItemGroup>
-
 </Project>

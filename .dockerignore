@@ -9,6 +9,8 @@ Docs/
 # Build Artifacts & Dependencies (Crucial: Let Docker compile fresh inside Linux)
 **/bin/
 **/obj/
+**/node_modules/
+**/.angular/
 **/publish-web/
 **/publish-api/
 **/release-web/

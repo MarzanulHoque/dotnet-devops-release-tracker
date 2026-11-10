@@ -7,16 +7,16 @@ services:
     container_name: dotnet-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: RootPassword123!
-      MYSQL_DATABASE: devops_deployments
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: AppPassword123!
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-devops_deployments}
+      MYSQL_USER: ${MYSQL_USER:-appuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "appuser", "-pAppPassword123!"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER:-appuser}", "-p${MYSQL_PASSWORD}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -36,7 +36,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       DatabaseProvider: MySql
-      ConnectionStrings__DefaultConnection: "Server=db;Port=3306;Database=devops_deployments;User=appuser;Password=AppPassword123!;"
+      ConnectionStrings__DefaultConnection: "Server=db;Port=3306;Database=${MYSQL_DATABASE:-devops_deployments};User=${MYSQL_USER:-appuser};Password=${MYSQL_PASSWORD};"
     ports:
       - "5050:5050"
 

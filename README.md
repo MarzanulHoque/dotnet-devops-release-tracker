@@ -1,88 +1,79 @@
-# 🚀 DevOps Deployment Tracker — Decoupled Angular SPA & REST API Architecture
+# 🚀 DevOps Deployment Tracker — Containerized Angular SPA & REST API Architecture
 
 [![CI/CD Build & Test](https://github.com/marzanulhoque/dotnet-devops-release-tracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/marzanulhoque/dotnet-devops-release-tracker/actions)
-[![Architecture](https://img.shields.io/badge/Architecture-Angular%20SPA%20%2B%20REST%20API-blueviolet)](#-phase-3-decoupled-spa-architecture)
+[![Architecture](https://img.shields.io/badge/Architecture-Docker%20Compose%203--Tier-blueviolet)](#-containerized-cloud--vm-architecture)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Stage%20Builds-2496ED?logo=docker&logoColor=white)](#-docker-orchestration)
+[![Angular](https://img.shields.io/badge/Angular-20%20Standalone-DD0031?logo=angular)](#-architectural-principles)
+[![.NET 8.0](https://img.shields.io/badge/.NET-8.0%20LTS-512BD4?logo=dotnet)](#-architectural-principles)
+[![MySQL](https://img.shields.io/badge/Database-MySQL%208.0-4479A1?logo=mysql)](#-architectural-principles)
 [![Swagger OpenAPI](https://img.shields.io/badge/API%20Docs-Swagger%20OpenAPI-success?logo=swagger)](#-key-features)
-![Angular](https://img.shields.io/badge/Angular-20%20Standalone-DD0031?logo=angular)
-![.NET 8.0](https://img.shields.io/badge/.NET-8.0%20LTS-512BD4?logo=dotnet)
-![AWS EC2](https://img.shields.io/badge/AWS-EC2%20Linux-FF9900?logo=amazonec2)
-![MySQL](https://img.shields.io/badge/Database-MySQL%208.0-4479A1?logo=mysql)
-![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions)
+[![VMware Ready](https://img.shields.io/badge/VMware-Workstation%20%2F%20Linux%20VM-607078?logo=vmware&logoColor=white)](#-local--vmware-quickstart)
 
-> 💡 **Cloud Cost Optimization Notice:** The AWS EC2 demonstration instance was stopped after milestone validation to eliminate idle cloud costs. The full decoupled ecosystem can be deployed on-demand via our automated CI/CD pipeline or run locally using the instructions below.
+> 💡 **Cloud & Local Homelab DevOps:** The platform can be deployed on AWS EC2 or locally on **VMware Workstation / Linux VMs** with full multi-container isolation via Docker Compose.
 > 
-> ⚙️ **Phase 3 Stack:** Angular 20 Standalone SPA (:4200) • ASP.NET Core 8.0 REST API Microservice (:5050) • Pomelo MySQL 8.0 Relational Persistence • Nginx / Docker Container Ready
+> ⚙️ **Production Stack:** Angular 20 Standalone SPA (:80 via Nginx) • ASP.NET Core 8.0 REST API Microservice (:5050) • Pomelo MySQL 8.0 Relational Persistence (:3306) • Docker Compose Orchestration
 
 ---
 
-## 🏛️ Phase 3 Decoupled SPA Architecture
+## 🏛️ Containerized Cloud & VM Architecture
 
-In **Phase 3**, the legacy monolithic MVC layer has been converted into an enterprise-grade **Angular 20 Single-Page Application (SPA)**:
+The entire ecosystem is orchestrated with **Docker Compose**, running as isolated, networked microservices:
 
 ```
-[ Browser / Single-Page Application ]
-                 │
-                 ▼ (Port 4200 in Dev / Port 80 via Reverse Proxy)
-     [ Angular 20 Standalone SPA ]
-                 │
-                 │ (HTTP / JSON over CORS with Angular Signals)
-                 ▼
-   [ REST API Microservice Tier (:5050) ] ◄─── [ External CI/CD Webhooks ]
-                 │                                        ▲
-                 │ (Entity Framework Core Pomelo)         │
-                 ▼                              [ Swagger OpenAPI Docs ]
-     [ MySQL 8.0 Database Tier ]
+[ Browser / Public Client ]
+             │
+             ▼ (Port 80)
+   ┌────────────────────────────────────────────────────────────────────────┐
+   │                     Docker Compose Bridge Network                      │
+   │                                                                        │
+   │  ┌────────────────────────┐         ┌───────────────────────────────┐  │
+   │  │   dotnet-frontend      │         │          dotnet-api           │  │
+   │  │   (Angular 20 SPA)     │         │      (ASP.NET Core 8.0)       │  │
+   │  │                        │         │                               │  │
+   │  │  • Nginx Alpine (:80)  │────────►│  • Kestrel Microservice       │  │
+   │  │  • Static Asset Host   │ /api/   │    (:5050)                    │  │
+   │  │  • Internal Reverse    │ proxy   │  • Swagger OpenAPI (/swagger) │  │
+   │  │    Proxy to API        │         │  • Automatic EF Migrations    │  │
+   │  └────────────────────────┘         └───────────────┬───────────────┘  │
+   │                                                     │                  │
+   │                                                     │ (Pomelo EF Core) │
+   │                                                     ▼                  │
+   │                                     ┌───────────────────────────────┐  │
+   │                                     │           dotnet-db           │  │
+   │                                     │          (MySQL 8.0)          │  │
+   │                                     │                               │  │
+   │                                     │  • Persistent Volume (db_data)│  │
+   │                                     │  • Automatic Healthcheck      │  │
+   │                                     └───────────────────────────────┘  │
+   └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Architectural Principles:
-1. **Modern Frontend SPA (`frontend/`)**:
+1. **Frontend Presentation Tier (`frontend/`)**:
    - Built with **Angular 20 Standalone Components**, eliminating legacy NgModules.
    - Reactive state management powered by **Angular Signals** (`signal`, `computed`) for live telemetry computation.
-   - Modern dark glassmorphic design system using **Bootstrap 5.3 + Bootstrap Icons**.
-   - Dynamic real-time API health heartbeat indicator and telemetry data table with client-side filtering, sorting, and pagination.
-2. **Autonomous Business / REST API Tier (`DotnetProject.Api`)**:
-   - Autonomous RESTful Web API listening on port `5050` with open CORS for the SPA.
-   - Implements full release CRUD operations, query filtering, and real-time system diagnostics (`/api/health`).
-   - Hosts interactive OpenAPI documentation at `/swagger`.
-   - Ingests automated deployment events directly from CI/CD pipelines via `POST /api/deployments/webhook`.
-3. **Domain & Data Access Tier (`DotnetProject.Core`)**:
+   - Packaged with a multi-stage **`frontend/Dockerfile`** and served via an optimized **Nginx Alpine** runtime (~25MB).
+   - Built-in **Nginx Reverse Proxy** forwards all `/api/` traffic to the backend container, eliminating cross-origin (CORS) concerns.
+2. **Business / REST API Microservice Tier (`DotnetProject.Api`)**:
+   - Containerized via multi-stage **`DotnetProject.Api/Dockerfile`** with .NET 8.0 SDK on Alpine (~100MB final runtime image).
+   - Autonomous RESTful Web API listening on port `5050`.
+   - Automatic database schema creation and seed data execution on startup via `context.Database.Migrate()`.
+   - Exposes `POST /api/deployments/webhook` to ingest automated deployment telemetry directly from CI/CD pipelines.
+3. **Domain & Data Access Tier (`DotnetProject.Core` & MySQL 8.0)**:
    - Centralized relational domain: `Projects`, `Deployments`, and `DeploymentLogs`.
-   - Code-First EF Core migrations with automatic startup synchronization via `context.Database.Migrate()`.
+   - MySQL 8.0 container with persistent Docker volume (`db_data`) ensuring zero data loss across container recycles.
+   - Healthcheck integration ensures the API container waits until MySQL is fully ready before launching.
 
 ---
 
 ## ✨ Key Features
 
-- **True 3-Tier Decoupling:** Complete separation of presentation (MVC), business logic/integration (Web API), and persistence (MySQL).
-- **Container-Grade Linux Isolation on Bare EC2:** Both services run under native `systemd` with `DynamicUser=yes`, `ProtectSystem=strict`, `ProtectHome=yes`, `NoNewPrivileges=true`, and `PrivateTmp=true` — delivering container-grade sandboxing without Docker daemon RAM overhead.
-- **Automated CI/CD Webhook Ingestion:** External pipeline bots post release metadata directly to `/api/deployments/webhook`.
-- **Interactive Swagger OpenAPI Documentation:** Live API exploration at `/swagger`.
-- **Automated Startup EF Core Migrations:** Zero manual SQL scripts required; schema upgrades execute idempotently via `context.Database.Migrate()`.
-- **Zero Secrets in Source Control:** Database credentials reside strictly in server-only `/etc/dotnetapp.env` (`chmod 600`), dynamically loaded by the API daemon.
-- **Fail-Safe CI Quality Gates:** 16 automated xUnit tests run on every push, testing models, controllers, and API contracts.
-
----
-
-## 🔒 Security & Linux Kernel Sandboxing
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 AWS Linux EC2 Server Host                                   │
-│                                                                                             │
-│  1. Server Secrets File: /etc/dotnetapp.env (chmod 600, www-data owned)                    │
-│     └── ConnectionStrings__DefaultConnection="Server=...;User=...;Password=<RANDOM_GEN>;"  │
-│                                                                                             │
-│  2. Linux systemd Kernel Sandboxing (dotnetapi.service & dotnetapp.service)                │
-│     ├── DynamicUser=yes       ──► Ephemeral UID dynamically allocated per run               │
-│     ├── ProtectSystem=strict  ──► Entire root filesystem is mounted strictly read-only      │
-│     ├── ProtectHome=yes       ──► /home and /root are completely inaccessible               │
-│     ├── NoNewPrivileges=true  ──► Disables privilege escalation exploits                    │
-│     └── PrivateTmp=true       ──► Isolated temporary file namespace                         │
-│                                                                                             │
-│  3. Host Ingress Boundary (Nginx)                                                           │
-│     └── Public Port 80 only. Internal Kestrel ports 5000 & 5050 bound strictly to 127.0.0.1 │
-└─────────────────────────────────────────────────────────────────────────────────────────────┘
-```
+- **Multi-Stage Docker Builds:** Ultra-lean production images for both Angular (.NET build: ~100MB; Angular/Nginx: ~25MB).
+- **Single-Command Orchestration:** `docker compose up -d --build` spins up database, backend, and frontend with a single command.
+- **Dynamic Secrets Management:** Credentials loaded safely via `.env` file (never committed to git) with `.env.example` template provided.
+- **Automated Startup EF Core Migrations:** Zero manual SQL scripts required; schema upgrades and initial seed data execute idempotently on boot.
+- **Real-Time Telemetry Dashboard:** Live deployment statistics, environment breakdowns, and animated architecture topologies.
+- **Fail-Safe CI Quality Gates:** Automated xUnit test suite verifies domain models, controllers, and API contracts.
 
 ---
 
@@ -90,78 +81,94 @@ In **Phase 3**, the legacy monolithic MVC layer has been converted into an enter
 
 ```
 .
-├── .github/workflows/
-│   └── deploy.yml                       # Dual-daemon CI/CD pipeline for main & feat/** branches
+├── docker-compose.yml                   # Multi-container orchestration (db, api, frontend)
+├── .env.example                         # Environment secrets template for deployment
+├── .dockerignore                        # Optimized build context filtering
 ├── DotnetProject.Core/                  # Shared Domain & Data Library
 │   ├── Data/
 │   │   ├── ApplicationDbContext.cs      # EF Core MySQL mapping & seed data
 │   │   └── ApplicationDbContextFactory.cs # Design-time factory for EF Core migrations
-│   ├── DTOs/                            # Transfer models (CRUD, Webhooks, Responses)
+│   ├── DTOs/                            # Data Transfer Objects (CRUD, Webhooks, Responses)
 │   ├── Entities/                        # Project, DeploymentRecord, DeploymentLog
-│   └── Migrations/                      # Compiled EF Core Code-First migration snapshots
+│   └── Migrations/                      # EF Core Code-First migration snapshots
 ├── DotnetProject.Api/                   # Tier 2: RESTful Web API (:5050)
 │   ├── Controllers/
 │   │   ├── DeploymentsController.cs     # CRUD & CI/CD webhook endpoint
 │   │   ├── HealthController.cs          # API diagnostics & database probe
 │   │   └── ProjectsController.cs        # Registered applications catalog
+│   ├── Dockerfile                       # Multi-stage Alpine container build
 │   └── Program.cs                       # Swagger, CORS, and automatic DB migration
-├── frontend/                            # Tier 1: Modern Angular 20 Standalone SPA (:4200)
+├── frontend/                            # Tier 1: Modern Angular 20 Standalone SPA (:80)
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── core/                    # Models (Deployment, Project, Health) & Signals Services
+│   │   │   ├── core/                    # Models & Signals Services (Deployment, Project, Health)
 │   │   │   ├── shared/                  # Navbar with Heartbeat, Footer, StatusBadge
 │   │   │   └── features/                # Dashboard, Deployments CRUD & Diagnostics views
-│   │   ├── environments/                # Environment configurations (API Base URL)
 │   │   └── styles.css                   # Bootstrap 5.3 + Glassmorphic Telemetry Theme
-│   └── angular.json                     # Standalone application build configuration
-├── tests/DotnetProject.Tests/           # xUnit Test Suite (12/12 Passed)
-│   ├── DeploymentsApiControllerTests.cs # Integration tests for REST API endpoints
-│   ├── DeploymentRecordModelTests.cs    # Domain model validation tests
-│   └── HealthCheckTests.cs              # Health diagnostics verification
-└── deploy/                              # Infrastructure as Code (IaC)
-    ├── api.service                      # systemd unit for DotnetProject.Api (:5050)
-    ├── nginx.conf                       # Reverse proxy path-routing configuration
-    └── setup-ec2.sh                     # Idempotent EC2 bootstrap script
+│   ├── Dockerfile                       # Multi-stage Node.js + Nginx Alpine build
+│   └── nginx.conf                       # SPA routing fallback and API proxy configuration
+└── tests/DotnetProject.Tests/           # xUnit Test Suite (12/12 Passed)
+    ├── DeploymentsApiControllerTests.cs # Integration tests for REST API endpoints
+    ├── DeploymentRecordModelTests.cs    # Domain model validation tests
+    └── HealthCheckTests.cs              # Health diagnostics verification
 ```
 
 ---
 
-## 🚀 Local Development Quickstart
+## 🚀 Local & VMware Quickstart
 
-### Prerequisites
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Node.js 20+ / npm](https://nodejs.org/)
+### Method 1: Docker Compose (Recommended for Local & VMware VMs)
+
+#### Prerequisites:
+- [Docker Engine & Docker Compose](https://docs.docker.com/engine/install/) (or Docker Desktop)
 - Git
 
-### 1. Build & Run Automated Tests
+#### 1. Clone & Configure Secrets:
 ```bash
-# Clone repository
 git clone https://github.com/marzanulhoque/dotnet-devops-release-tracker.git
 cd dotnet-devops-release-tracker
 
-# Run .NET backend and integration tests
-dotnet test --nologo
-
-# Run Angular frontend build
-cd frontend
-npm install
-npm run build
-cd ..
+# Create your private environment configuration from template
+cp .env.example .env
 ```
 
-### 2. Launch Services Locally
+#### 2. Launch Stack:
 ```bash
-# Terminal 1: Launch ASP.NET Core REST API (:5050)
+docker compose up -d --build
+```
+
+#### 3. Verify Containers:
+```bash
+docker compose ps
+```
+
+* **Angular UI Dashboard:** `http://localhost/` (or `http://<VM-IP-ADDRESS>/`)
+* **Swagger OpenAPI Docs:** `http://localhost:5050/swagger`
+* **API Health Diagnostics:** `http://localhost:5050/api/health`
+
+---
+
+### Method 2: Local Development (Without Docker)
+
+#### Prerequisites:
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Node.js 20+ / npm](https://nodejs.org/)
+
+#### 1. Run Automated Tests:
+```bash
+dotnet test --nologo
+```
+
+#### 2. Launch Services:
+```bash
+# Terminal 1: Launch REST API (:5050)
 dotnet run --project DotnetProject.Api
 
 # Terminal 2: Launch Angular Standalone SPA (:4200)
 cd frontend
+npm install
 npm start
 ```
-
-- **Angular UI Dashboard:** `http://localhost:4200/`
-- **Swagger Documentation:** `http://localhost:5050/swagger`
-- **API Health Diagnostics:** `http://localhost:5050/api/health`
 
 ---
 
@@ -175,8 +182,12 @@ npm start
 - [x] **Phase 3: Decoupled Angular Standalone SPA (`feat/phase3-angular-frontend`)**
   - Converted UI into Angular 20 Standalone SPA (`frontend/`) using Angular Signals and Bootstrap 5.3 telemetry theme.
   - Full CRUD operations, live API heartbeat probe, and deprecation of legacy MVC project.
-- [ ] **Phase 4: Docker Containerization (`feat/phase3-docker-containerization` - Upcoming)**
-  - Containerize the decoupled frontend and REST API using multi-stage Dockerfiles and compose orchestration.
+- [x] **Phase 4: Docker Containerization & VMware Deployment (`feat/phase3-docker-containerization`)**
+  - Multi-stage Dockerfiles for both frontend (Angular + Nginx) and backend (.NET 8).
+  - Docker Compose orchestration with healthchecks, persistent volumes, and `.env` secrets management.
+  - Deployment-ready on local development environments, VMware Workstation Linux VMs, and cloud hypervisors.
+- [ ] **Phase 5: Automated CI/CD with Self-Hosted Runner on VMware (Upcoming)**
+  - Automated continuous delivery pipeline triggering on pushes to `main` with live status reporting.
 
 ---
 
